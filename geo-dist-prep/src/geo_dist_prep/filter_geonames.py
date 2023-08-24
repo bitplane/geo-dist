@@ -36,8 +36,7 @@ def process_tsv(columns, filters, infile):
 
             yield fields
         except Exception:
-            raise
-            # pass  # be better than this
+            pass  # be better than this
 
 
 columns = ["osm_id", "type", "lon", "lat", "name", "geohash"]

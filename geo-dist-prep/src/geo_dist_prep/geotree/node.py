@@ -46,7 +46,7 @@ def location_to_pos(lat, lon):
     atlantic ocean and doesn't intersect any land masses other than
     greenland, which is mostly ice.
     """
-    y = (lat + 90) / 180
-    x = (lon + 150) / 360
+    y = ((lat - 90) % 180.0) / 180.0
+    x = ((lon - 150) % 360.0) / 360.0
 
     return y, x
