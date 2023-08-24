@@ -3,7 +3,7 @@
 import csv
 import sys
 
-from geotree import Tree
+from .geotree import Tree
 
 
 def load_tree(infile):

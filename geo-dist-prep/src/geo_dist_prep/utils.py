@@ -2,23 +2,22 @@ def bisection_sort(seq) -> list:
     """
     Sort a seqence in a way that builds a balanced tree
     """
+    current = [sorted(seq)]
+    output = []
 
-    def recurse(sorted_list):
-        if len(sorted_list) == 0:
-            return []
-        if len(sorted_list) == 1:
-            return [sorted_list[0]]
+    while current:
+        new = []
+        for c in current:
+            if not c:
+                continue
+            median_index = len(c) // 2
+            middle = c[median_index]
+            front = c[:median_index]
+            back = c[median_index + 1 :]
 
-        # find the median
-        median_index = len(sorted_list) // 2
-        median = sorted_list[median_index]
+            output.append(middle)
+            new = [front] + new + [back]
 
-        # split into two halves, excluding the median
-        lower_half = sorted_list[:median_index]
-        upper_half = sorted_list[median_index + 1 :]
+        current = new
 
-        # Recursively sort the two halves
-        return [median] + recurse(lower_half) + recurse(upper_half)
-
-    sorted_list = sorted(seq)
-    return recurse(sorted_list)
+    return output
