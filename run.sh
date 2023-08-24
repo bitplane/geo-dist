@@ -14,4 +14,6 @@ echo "Filtering geonames"
 
 zcat "$geoNamesFile" | ./filter_geonames.py > .cache/filtered.tsv
 
+echo "Building node tree"
+
 ./node_tree.py .cache/filtered.tsv > .cache/nodes.json
