@@ -2,22 +2,23 @@ def bisection_sort(seq) -> list:
     """
     Sort a seqence in a way that builds a balanced tree
     """
-    current = [sorted(seq)]
+    seq = sorted(seq)
+    visited = set()
+
+    step = len(seq) // 2
+    pos = step
     output = []
 
-    while current:
-        new = []
-        for c in current:
-            if not c:
+    while step > 0:
+        for i in range(pos, len(seq), step):
+            if i in visited:
                 continue
-            median_index = len(c) // 2
-            middle = c[median_index]
-            front = c[:median_index]
-            back = c[median_index + 1 :]
+            output.append(seq[i])
+            visited.add(i)
+        step = step // 2
+        pos = step
 
-            output.append(middle)
-            new = [front] + new + [back]
-
-        current = new
+    if len(output) != len(seq):
+        output.append(seq[0])
 
     return output
