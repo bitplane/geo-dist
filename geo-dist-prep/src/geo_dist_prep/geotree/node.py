@@ -1,6 +1,3 @@
-from geo_dist_prep.utils import bisection_sort
-
-
 class GeoNode:
     """
     A node in a geo-quadtree.

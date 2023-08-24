@@ -9,7 +9,7 @@ Find the distance between two places.
 4. find the closest nodes
 5. try to route between nearby places
    openrouteservice with this for now:
-   https://download.geofabrik.de/europe/great-britain-latest.osm.pbf
+   <https://download.geofabrik.de/europe/great-britain-latest.osm.pbf>
 6. if the distance is close to the tree node size, collapse segment
 
 ## notes

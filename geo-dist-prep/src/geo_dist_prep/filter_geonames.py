@@ -1,26 +1,28 @@
 #!/usr/bin/env python
-
-import sys
+"""
+todo: remove geohash dogshit
+"""
 import csv
 import re
-import pygeohash
+import sys
 
+import pygeohash
 
 csv.field_size_limit(sys.maxsize)
 
 
 def process_tsv(columns, filters, infile):
-    reader = csv.DictReader(infile, delimiter='\t')
+    reader = csv.DictReader(infile, delimiter="\t")
 
     # Print the header
-    print('\t'.join(columns))
+    print("\t".join(columns))
 
     for row in reader:
         try:
             filtered = not all(
-                    re.match(col_regex, row[col_name])
-                    for col_name, col_regex in filters.items()
-                    if row[col_name]
+                re.match(col_regex, row[col_name])
+                for col_name, col_regex in filters.items()
+                if row[col_name]
             )
 
             if filtered:
@@ -35,7 +37,7 @@ def process_tsv(columns, filters, infile):
 
             fields = [row[col] for col in columns]
 
-            print('\t'.join(fields))
+            print("\t".join(fields))
         except Exception:
             # raise
             pass  # be better than this
@@ -43,9 +45,9 @@ def process_tsv(columns, filters, infile):
 
 columns = ["osm_id", "type", "lon", "lat", "name", "geohash"]
 filters = {
-   "osm_type": "node",
-   "class": "place",
-   "type": "city|village|hamlet|borough|suburb|quarter|neighbourhood"
+    "osm_type": "node",
+    "class": "place",
+    "type": "city|village|hamlet|borough|suburb|quarter|neighbourhood",
 }
 
 process_tsv(columns, filters, sys.stdin)

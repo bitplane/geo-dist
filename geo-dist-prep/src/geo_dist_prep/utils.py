@@ -1,8 +1,8 @@
-
 def bisection_sort(seq) -> list:
     """
     Sort a seqence in a way that builds a balanced tree
     """
+
     def recurse(sorted_list):
         if len(sorted_list) == 0:
             return []
@@ -15,7 +15,7 @@ def bisection_sort(seq) -> list:
 
         # split into two halves, excluding the median
         lower_half = sorted_list[:median_index]
-        upper_half = sorted_list[median_index + 1:]
+        upper_half = sorted_list[median_index + 1 :]
 
         # Recursively sort the two halves
         return [median] + recurse(lower_half) + recurse(upper_half)

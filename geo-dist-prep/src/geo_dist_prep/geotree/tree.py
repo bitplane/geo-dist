@@ -1,11 +1,13 @@
 from geo_dist_prep.utils import bisection_sort
-from geo_dist_prep.geonode import GeoNode, location_to_pos
+
+from .node import GeoNode, location_to_pos
 
 
 class Tree:
     """
     A quadtree for storing geospatial data
     """
+
     def __init__(self):
         self.root = GeoNode()
         self.members = {}
