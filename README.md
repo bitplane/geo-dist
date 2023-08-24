@@ -1,5 +1,7 @@
 
+# Finding the distance between two places
 
+Find the distance between two places.
 
 1. get geonames tsv dump
 2. extract places
@@ -16,4 +18,6 @@ lookup:
 drill down into tree.
 5 digits should be enough.
 width and height alternates 4x8, 8x4
+
+nn:
 

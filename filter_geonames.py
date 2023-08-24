@@ -8,6 +8,7 @@ import pygeohash
 
 csv.field_size_limit(sys.maxsize)
 
+
 def process_tsv(columns, filters, infile):
     reader = csv.DictReader(infile, delimiter='\t')
 
@@ -24,7 +25,6 @@ def process_tsv(columns, filters, infile):
 
             if filtered:
                 continue
-        
 
             if row["lon"] and row["lat"]:
                 lat = float(row["lat"])
@@ -37,18 +37,15 @@ def process_tsv(columns, filters, infile):
 
             print('\t'.join(fields))
         except Exception:
-            #raise
-            pass # be better
+            # raise
+            pass  # be better than this
+
 
 columns = ["osm_id", "type", "lon", "lat", "name", "geohash"]
 filters = {
    "osm_type": "node",
-   "osm_id": ".*",
    "class": "place",
-   "type": "city|borough|suburb|quarter|neighbourhood|city_block",
-   "lon": ".*",
-   "lat": ".*",
-   "name": ".*",
+   "type": "city|village|hamlet|borough|suburb|quarter|neighbourhood"
 }
 
 process_tsv(columns, filters, sys.stdin)
