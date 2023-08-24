@@ -1,0 +1,35 @@
+[project]
+name = "geo-dist-prep"
+description = "Service to get road distances between locations"
+version = "0.1.0"
+authors = [
+    { name = "Gareth Davidson", email = "gaz@bitplane.net" }
+]
+
+readme = "README.md"
+requires-python = ">=3.9"
+
+dependencies = [
+    "pygeohash"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pydantic",
+    "flake8",
+    "pre-commit",
+    "pytest",
+    "pytest-cov",
+    "coverage",
+    "build"
+]
+
+[build-system]
+build-backend = "flit_core.buildapi"
+requires = ["flit_core >=3.2,<4"]
+
+
+[project.urls]
+"Homepage" = "https://github.com/bitplane/geo-dist"
+"Bug Tracker" = "https://github.com/bitplane/geo-dist/issues"
+
