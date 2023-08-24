@@ -1,7 +1,4 @@
 #!/usr/bin/env python
-"""
-todo: remove geohash dogshit
-"""
 import csv
 import re
 import sys
@@ -15,7 +12,7 @@ def process_tsv(columns, filters, infile):
     reader = csv.DictReader(infile, delimiter="\t")
 
     # Print the header
-    print("\t".join(columns))
+    yield columns
 
     for row in reader:
         try:
@@ -37,10 +34,10 @@ def process_tsv(columns, filters, infile):
 
             fields = [row[col] for col in columns]
 
-            print("\t".join(fields))
+            yield fields
         except Exception:
-            # raise
-            pass  # be better than this
+            raise
+            # pass  # be better than this
 
 
 columns = ["osm_id", "type", "lon", "lat", "name", "geohash"]
@@ -50,4 +47,7 @@ filters = {
     "type": "city|village|hamlet|borough|suburb|quarter|neighbourhood",
 }
 
-process_tsv(columns, filters, sys.stdin)
+
+if __name__ == "__main__":
+    for row in process_tsv(columns, filters, sys.stdin):
+        print("\t".join(row))
