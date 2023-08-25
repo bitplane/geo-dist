@@ -22,3 +22,4 @@ greenland but there's no roads in most of the country.
 * openrouteservice uses lon,lat not lat,lon:
   <http://localhost:8080/ors/v2/directions/driving-car?start=-0.1526548,51.5375137&end=-0.15689,51.53942>
 * needs 2x the RAM of the file you're loading
+* `jq '.features[].properties.summary.distance'`

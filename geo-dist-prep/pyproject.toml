@@ -10,7 +10,12 @@ readme = "README.md"
 requires-python = ">=3.9"
 
 dependencies = [
-    "pygeohash"
+    "pygeohash",
+    "jupyter",
+    "tensorflow",
+    "scikit-learn",
+    "httpx[http2]",
+    "matplotlib"
 ]
 
 [project.optional-dependencies]

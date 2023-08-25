@@ -2,9 +2,11 @@
 .PHONY: help all install test dev coverage clean \
 		pre-commit update-pre-commit
 
+GEOTREE_SRC := $(find geo-dist-prep/src/geo_dist_prep/geonode -type f -name '*.py')
+
 # SOURCE_FILES := $(shell find . -type f -name '*.py')
 
-all: .cache/location-tree.pkl
+all: .cache/data.tsv
 
 install: .venv/.installed  ## installs the venv and the project packages
 
@@ -41,9 +43,11 @@ update-pre-commit: build/update-pre-commit.sh  ## autoupdate pre-commit
 .cache/filtered-geonames.tsv: .cache/geonames.tsv.gz.done build/filter-geonames.sh geo-dist-prep/src/geo_dist_prep/filter_geonames.py
 	build/filter-geonames.sh
 
-GEOTREE_FILES := $(find geo-dist-prep/src/geo_dist_prep/geonode -type f -name '*.py')
-.cache/location-tree.pkl: .cache/filtered-geonames.tsv build/build-tree.sh geo-dist-prep/src/geo_dist_prep/node_tree.py $(GEOTREE_FILES)
+.cache/tree.pkl: .cache/filtered-geonames.tsv build/build-tree.sh geo-dist-prep/src/geo_dist_prep/build_tree.py $(GEOTREE_SRC)
 	build/build-tree.sh
+
+.cache/data.tsv: .cache/tree.pkl build/create-data.sh geo-dist-prep/src/geo_dist_prep/create_data.py $(GEOTREE_SRC)
+	build/create-data.sh
 
 help: ## Show this help
 	@egrep -h '\s##\s' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'

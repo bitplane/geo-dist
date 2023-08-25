@@ -33,10 +33,24 @@ class GeoNode:
             else:
                 self.nodes[idx].add(node)
 
+    def get_levels(self, y, x):
+        """
+        Returns a list of nodes to the target position
+        """
+        idx = self.get_idx(y, x)
+        node = self.nodes[idx]
+        return [self] + (node.get_levels(y, x) if node else [])
+
     def get_idx(self, y, x):
         pos_y = 0 if y < self.y else 2
         pos_x = 0 if x < self.x else 1
         return pos_y + pos_x
+
+    def distance(self, y, x):
+        """
+        Return the distance to a point
+        """
+        return ((self.y - y) ** 2 + (self.x - x) ** 2) ** 0.5
 
     def __repr__(self):
         return f"GeoNode({self.y}, {self.x}, {self.is_leaf})"

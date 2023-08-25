@@ -38,3 +38,22 @@ class Tree:
         for y, x in self.members.keys():
             node = GeoNode(y, x, value=self.members[(y, x)], leaf=True)
             self.root.add(node)
+
+    def sample_data(self, max_distance, neighbours=10):
+        """
+        Sample data from the tree
+        """
+        for y, x in self.members.keys():
+            nodes = self.root.get_levels(y, x)
+            group = {nodes.pop()}
+
+            while nodes and len(group) < neighbours:
+                parent = nodes.pop()
+                for node in parent.nodes:
+                    if node in group:
+                        continue
+                    if node.distance(y, x) < max_distance:
+                        group.add(node)
+
+            for node in group:
+                yield node.value

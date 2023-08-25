@@ -4,15 +4,22 @@ import re
 import sys
 
 import pygeohash
+from geo_dist_prep.geotree.data import COLUMNS
 
-csv.field_size_limit(sys.maxsize)
+filters = {
+    "osm_type": "node",
+    "class": "place",
+    "type": "city|village|hamlet|borough|suburb|quarter|neighbourhood",
+    "country_code": "$gb|ie|im|gg|je^",
+}
 
 
-def process_tsv(columns, filters, infile):
+def filter_geonames(filters, infile):
+    csv.field_size_limit(sys.maxsize)
+
     reader = csv.DictReader(infile, delimiter="\t")
 
-    # Print the header
-    yield columns
+    yield COLUMNS
 
     for row in reader:
         try:
@@ -32,24 +39,13 @@ def process_tsv(columns, filters, infile):
             else:
                 row["geohash"] = ""
 
-            if not row["geohash"].startswith("g"):
-                continue
-
-            fields = [row[col] for col in columns]
+            fields = [row[col] for col in COLUMNS]
 
             yield fields
         except Exception:
-            pass  # be better than this
-
-
-columns = ["osm_id", "type", "lon", "lat", "name", "geohash"]
-filters = {
-    "osm_type": "node",
-    "class": "place",
-    "type": "city|village|hamlet|borough|suburb|quarter|neighbourhood",
-}
+            pass  # shame on me
 
 
 if __name__ == "__main__":
-    for row in process_tsv(columns, filters, sys.stdin):
+    for row in filter_geonames(filters, sys.stdin):
         print("\t".join(field or "" for field in row))

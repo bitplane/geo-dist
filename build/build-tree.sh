@@ -6,4 +6,4 @@ set -e
 
 echo "Building tree"
 
-python -m geo_dist_prep.node_tree
+python -m geo_dist_prep.build_tree
