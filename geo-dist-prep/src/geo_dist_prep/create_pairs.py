@@ -12,7 +12,7 @@ def create_data():
 
     yield ["lon1", "lat1", "lon2", "lat2"]
 
-    for row in tree.sample_data(max_distance):
+    for row in tree.sample_data(max_distance, neighbours=20):
         yield row
 
 

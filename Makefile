@@ -2,7 +2,7 @@
 .PHONY: help all install test dev coverage clean \
 		pre-commit update-pre-commit
 
-GEOTREE_SRC := $(find geo-dist-prep/src/geo_dist_prep/geonode -type f -name '*.py')
+GEOTREE_SRC := $(shell find geo-dist-prep/src/geo_dist_prep/geotree -type f -name '*.py')
 
 # SOURCE_FILES := $(shell find . -type f -name '*.py')
 
@@ -37,20 +37,38 @@ update-pre-commit: build/update-pre-commit.sh  ## autoupdate pre-commit
 .git/hooks/pre-commit: build/install-pre-commit.sh
 	build/install-pre-commit.sh
 
+
+
+#--- Targets for processing steps here ---#
+
+
+
+# 1. download the geonames file
 .cache/geonames.tsv.gz.done: build/download-geonames.sh
 	build/download-geonames.sh
 
+# 2. filter out names we don't want
 .cache/filtered-geonames.tsv: .cache/geonames.tsv.gz.done build/filter-geonames.sh geo-dist-prep/src/geo_dist_prep/filter_geonames.py
 	build/filter-geonames.sh
 
+# 3. Build it into a quad-tree
 .cache/tree.pkl: .cache/filtered-geonames.tsv build/build-tree.sh geo-dist-prep/src/geo_dist_prep/build_tree.py $(GEOTREE_SRC)
 	build/build-tree.sh
 
+# 4. Use the tree to find nearby nodes
 .cache/pairs.tsv: .cache/tree.pkl build/create-pairs.sh geo-dist-prep/src/geo_dist_prep/create_pairs.py $(GEOTREE_SRC)
 	build/create-pairs.sh
 
+# 5. Create the training data using the openrouteservice
 .cache/data.tsv: .cache/pairs.tsv build/create-data.sh geo-dist-prep/src/geo_dist_prep/create_data.py
 	build/create-data.sh
+
+# 6. Train the model
+
+# 7. Test the model
+
+# 8. Start the web service!
+
 
 
 help: ## Show this help
