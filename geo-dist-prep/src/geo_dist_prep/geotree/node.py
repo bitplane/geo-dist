@@ -38,6 +38,9 @@ class GeoNode:
         pos_x = 0 if x < self.x else 1
         return pos_y + pos_x
 
+    def __repr__(self):
+        return f"GeoNode({self.y}, {self.x}, {self.is_leaf})"
+
 
 def location_to_pos(lat, lon):
     """

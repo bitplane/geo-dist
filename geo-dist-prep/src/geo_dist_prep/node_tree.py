@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 
 import csv
+import pickle
 import sys
 
-from .geotree import Tree
+from geo_dist_prep.geotree import Tree
 
 
 def load_tree(infile):
@@ -25,11 +26,10 @@ if __name__ == "__main__":
     if len(sys.argv) == 2:
         file_name = sys.argv[1]
     else:
-        file_name = ".cache/filtered.tsv"
+        file_name = ".cache/filtered-geonames.tsv"
 
     with open(file_name) as infile:
         tree = load_tree(infile)
 
     # gctckgh7mybk
-
-    pass
+    pickle.dump(tree, open(".cache/location-tree.pkl", "wb"))

@@ -4,7 +4,7 @@
 
 # SOURCE_FILES := $(shell find . -type f -name '*.py')
 
-all: .cache/filtered-geonames.tsv
+all: .cache/location-tree.pkl
 
 install: .venv/.installed  ## installs the venv and the project packages
 
@@ -38,8 +38,11 @@ update-pre-commit: build/update-pre-commit.sh  ## autoupdate pre-commit
 .cache/geonames.tsv.gz.done: build/download-geonames.sh
 	build/download-geonames.sh
 
-.cache/filtered-geonames.tsv: .cache/geonames.tsv.gz.done build/filter-geonames.sh
+.cache/filtered-geonames.tsv: .cache/geonames.tsv.gz.done build/filter-geonames.sh geo-dist-prep/src/geo_dist_prep/filter_geonames.py
 	build/filter-geonames.sh
+
+.cache/location-tree.pkl: .cache/filtered-geonames.tsv build/build-tree.sh geo-dist-prep/src/geo_dist_prep/node_tree.py geo-dist-prep/src/geo_dist_prep/geonode/*.py
+	build/build-tree.sh
 
 help: ## Show this help
 	@egrep -h '\s##\s' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'

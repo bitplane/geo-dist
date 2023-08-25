@@ -32,6 +32,9 @@ def process_tsv(columns, filters, infile):
             else:
                 row["geohash"] = ""
 
+            if not row["geohash"].startswith("g"):
+                continue
+
             fields = [row[col] for col in columns]
 
             yield fields
@@ -49,4 +52,4 @@ filters = {
 
 if __name__ == "__main__":
     for row in process_tsv(columns, filters, sys.stdin):
-        print("\t".join(row))
+        print("\t".join(field or "" for field in row))
