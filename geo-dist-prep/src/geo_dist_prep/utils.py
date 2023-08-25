@@ -1,3 +1,8 @@
+from math import pi
+
+degree_to_rad = float(pi / 180.0)
+
+
 def bisection_sort(seq) -> list:
     """
     Sort a seqence in a way that builds a balanced tree

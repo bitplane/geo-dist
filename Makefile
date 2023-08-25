@@ -49,5 +49,9 @@ update-pre-commit: build/update-pre-commit.sh  ## autoupdate pre-commit
 .cache/pairs.tsv: .cache/tree.pkl build/create-pairs.sh geo-dist-prep/src/geo_dist_prep/create_pairs.py $(GEOTREE_SRC)
 	build/create-pairs.sh
 
+.cache/data.tsv: .cache/pairs.tsv build/create-data.sh geo-dist-prep/src/geo_dist_prep/create_data.py
+	build/create-data.sh
+
+
 help: ## Show this help
 	@egrep -h '\s##\s' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
