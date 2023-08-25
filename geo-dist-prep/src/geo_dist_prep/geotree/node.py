@@ -39,7 +39,8 @@ class GeoNode:
         """
         idx = self.get_idx(y, x)
         node = self.nodes[idx]
-        return [self] + (node.get_levels(y, x) if node else [])
+
+        return [self] + (node.get_levels(y, x)) if node else [self]
 
     def get_idx(self, y, x):
         pos_y = 0 if y < self.y else 2

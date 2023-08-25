@@ -7,10 +7,10 @@ import pygeohash
 from geo_dist_prep.geotree.data import COLUMNS
 
 filters = {
-    "osm_type": "node",
-    "class": "place",
-    "type": "city|village|hamlet|borough|suburb|quarter|neighbourhood",
-    "country_code": "$gb|ie|im|gg|je^",
+    "osm_type": r"node",
+    "class": r"place",
+    "type": r"city|village|hamlet|borough|suburb|quarter|neighbourhood",
+    "country_code": r"\b(gb|im|ie|gg|je)\b",
 }
 
 
@@ -29,15 +29,12 @@ def filter_geonames(filters, infile):
                 if row[col_name]
             )
 
-            if filtered:
+            if filtered or not row["lat"] or not row["lon"]:
                 continue
 
-            if row["lon"] and row["lat"]:
-                lat = float(row["lat"])
-                lon = float(row["lon"])
-                row["geohash"] = pygeohash.encode(lat, lon)
-            else:
-                row["geohash"] = ""
+            lat = float(row["lat"])
+            lon = float(row["lon"])
+            row["geohash"] = pygeohash.encode(lat, lon)
 
             fields = [row[col] for col in COLUMNS]
 
@@ -46,6 +43,11 @@ def filter_geonames(filters, infile):
             pass  # shame on me
 
 
-if __name__ == "__main__":
+def print_filtered_geonames(fout=sys.stdout):
+    writer = csv.writer(fout, delimiter="\t")
     for row in filter_geonames(filters, sys.stdin):
-        print("\t".join(field or "" for field in row))
+        writer.writerow(row)
+
+
+if __name__ == "__main__":
+    print_filtered_geonames()

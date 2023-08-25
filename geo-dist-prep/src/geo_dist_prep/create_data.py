@@ -3,7 +3,7 @@
 import pickle
 
 from geo_dist_prep.geotree import Tree
-from geo_dist_prep.geotree.data import COLUMNS, TREE_FILE
+from geo_dist_prep.geotree.data import COLUMNS, DATA_FILE, TREE_FILE
 
 
 def create_data():
@@ -16,6 +16,11 @@ def create_data():
         yield row.items()
 
 
-if __name__ == "__main__":
+def write_data(fout):
     for row in create_data():
-        print("\t".join(field or "" for field in row))
+        fout.write("\t".join(str(field) or "" for field in row) + "\n")
+
+
+if __name__ == "__main__":
+    with open(DATA_FILE, "w") as f:
+        write_data(f)

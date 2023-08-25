@@ -50,10 +50,11 @@ class Tree:
             while nodes and len(group) < neighbours:
                 parent = nodes.pop()
                 for node in parent.nodes:
-                    if node in group:
+                    if not node or node in group:
                         continue
                     if node.distance(y, x) < max_distance:
                         group.add(node)
 
             for node in group:
-                yield node.value
+                if node.value:
+                    yield node.value
