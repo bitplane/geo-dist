@@ -41,7 +41,8 @@ update-pre-commit: build/update-pre-commit.sh  ## autoupdate pre-commit
 .cache/filtered-geonames.tsv: .cache/geonames.tsv.gz.done build/filter-geonames.sh geo-dist-prep/src/geo_dist_prep/filter_geonames.py
 	build/filter-geonames.sh
 
-.cache/location-tree.pkl: .cache/filtered-geonames.tsv build/build-tree.sh geo-dist-prep/src/geo_dist_prep/node_tree.py geo-dist-prep/src/geo_dist_prep/geonode/*.py
+GEOTREE_FILES := $(find geo-dist-prep/src/geo_dist_prep/geonode -type f -name '*.py')
+.cache/location-tree.pkl: .cache/filtered-geonames.tsv build/build-tree.sh geo-dist-prep/src/geo_dist_prep/node_tree.py $(GEOTREE_FILES)
 	build/build-tree.sh
 
 help: ## Show this help
