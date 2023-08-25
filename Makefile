@@ -46,8 +46,8 @@ update-pre-commit: build/update-pre-commit.sh  ## autoupdate pre-commit
 .cache/tree.pkl: .cache/filtered-geonames.tsv build/build-tree.sh geo-dist-prep/src/geo_dist_prep/build_tree.py $(GEOTREE_SRC)
 	build/build-tree.sh
 
-.cache/data.tsv: .cache/tree.pkl build/create-data.sh geo-dist-prep/src/geo_dist_prep/create_data.py $(GEOTREE_SRC)
-	build/create-data.sh
+.cache/pairs.tsv: .cache/tree.pkl build/create-pairs.sh geo-dist-prep/src/geo_dist_prep/create_pairs.py $(GEOTREE_SRC)
+	build/create-pairs.sh
 
 help: ## Show this help
 	@egrep -h '\s##\s' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'

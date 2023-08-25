@@ -45,7 +45,10 @@ class Tree:
         """
         for y, x in self.members.keys():
             nodes = self.root.get_levels(y, x)
-            group = {nodes.pop()}
+            base = nodes.pop()
+            if not base.value:
+                continue
+            group = {base}
 
             while nodes and len(group) < neighbours:
                 parent = nodes.pop()
@@ -57,4 +60,9 @@ class Tree:
 
             for node in group:
                 if node.value:
-                    yield node.value
+                    yield (
+                        node.value["lon"],
+                        node.value["lat"],
+                        base.value["lon"],
+                        base.value["lat"],
+                    )

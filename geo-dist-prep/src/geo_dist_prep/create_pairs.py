@@ -3,7 +3,7 @@
 import pickle
 
 from geo_dist_prep.geotree import Tree
-from geo_dist_prep.geotree.data import COLUMNS, DATA_FILE, TREE_FILE
+from geo_dist_prep.geotree.data import COLUMNS, NODE_PAIRS, TREE_FILE
 
 
 def create_data():
@@ -13,7 +13,7 @@ def create_data():
     yield COLUMNS
 
     for row in tree.sample_data(max_distance):
-        yield row.items()
+        yield row
 
 
 def write_data(fout):
@@ -22,5 +22,5 @@ def write_data(fout):
 
 
 if __name__ == "__main__":
-    with open(DATA_FILE, "w") as f:
-        write_data(f)
+    with open(NODE_PAIRS, "w") as fin:
+        write_data(fin)
