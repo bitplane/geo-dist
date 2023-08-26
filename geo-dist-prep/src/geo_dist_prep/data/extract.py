@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 import pickle
 
 from geo_dist_prep.geotree import Tree

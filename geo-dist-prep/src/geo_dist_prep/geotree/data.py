@@ -1,6 +1,6 @@
 import sys
 
-COLUMNS = ["osm_id", "type", "lon", "lat", "name", "country_code", "geohash"]
+COLUMNS = ["osm_id", "type", "lon", "lat", "name", "country_code"]
 
 GEONAMES_FILE = ".cache/geonames.tsv.gz"
 FILTERED_FILE = ".cache/filtered-geonames.tsv"

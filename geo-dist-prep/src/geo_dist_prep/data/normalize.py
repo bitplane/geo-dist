@@ -22,7 +22,6 @@ def normalize_row(r: dict):
 
 def normalize_data():
     reader = csv.DictReader(open(DIST_DATA, "rt"), delimiter="\t")
-    writer = csv.writer(open(NORMALIZED_DATA, "wt"), delimiter="\t")
 
     yield reader.fieldnames
 
@@ -30,7 +29,7 @@ def normalize_data():
         new_row = {field: row[field] for field in field_names}
         normalize_row(new_row)
 
-        writer.writerow(new_row)
+        yield new_row.values()
 
 
 def write_data(fout):
@@ -39,5 +38,5 @@ def write_data(fout):
 
 
 if __name__ == "__main__":
-    with open(DIST_DATA, "w") as fin:
+    with open(NORMALIZED_DATA, "wt") as fin:
         write_data(fin)
