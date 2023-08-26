@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 import csv
+import gzip
 import re
 import sys
 
 import pygeohash
-from geo_dist_prep.geotree.data import COLUMNS
+from geo_dist_prep.geotree.data import COLUMNS, FILTERED_FILE, GEONAMES_FILE
 
 filters = {
     "osm_type": r"node",
@@ -43,11 +44,13 @@ def filter_geonames(filters, infile):
             pass  # shame on me
 
 
-def print_filtered_geonames(fout=sys.stdout):
+def write_filtered_geonames():
+    fin = gzip.open(GEONAMES_FILE, "rt")
+    fout = open(FILTERED_FILE, "wt")
     writer = csv.writer(fout, delimiter="\t")
-    for row in filter_geonames(filters, sys.stdin):
+    for row in filter_geonames(filters, fin):
         writer.writerow(row)
 
 
 if __name__ == "__main__":
-    print_filtered_geonames()
+    write_filtered_geonames()

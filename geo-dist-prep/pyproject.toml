@@ -15,7 +15,8 @@ dependencies = [
     "tensorflow",
     "scikit-learn",
     "httpx[http2]",
-    "matplotlib"
+    "matplotlib",
+    "pandas"
 ]
 
 [project.optional-dependencies]

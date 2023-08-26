@@ -20,6 +20,7 @@ class GeoNode:
             self.nodes[idx] = node
         else:
             if self.is_leaf:
+                print(f"found leaf: {self.x, node.x, self.y, node.y}")
                 # copy the existing node into a new branch
                 new_node = GeoNode(self.y, self.x, self.value, leaf=True)
                 self.is_leaf = False
@@ -43,6 +44,9 @@ class GeoNode:
         return [self] + (node.get_levels(y, x)) if node else [self]
 
     def get_idx(self, y, x):
+        """
+        Return the correct slot relative to this node.
+        """
         pos_y = 0 if y < self.y else 2
         pos_x = 0 if x < self.x else 1
         return pos_y + pos_x

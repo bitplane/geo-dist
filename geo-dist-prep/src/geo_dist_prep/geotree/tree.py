@@ -25,11 +25,7 @@ class Tree:
         """
         # build the tree structure up-front so it's balanced
         # before doing any inserts
-        y_coords = (y for y, _x in self.members.keys())
-        x_coords = (x for _y, x in self.members.keys())
-        sorted_y = bisection_sort(y_coords)
-        sorted_x = bisection_sort(x_coords)
-        branch_keys = set(zip(sorted_y, sorted_x))
+        branch_keys = bisection_sort(self.members.keys())
 
         for y, x in branch_keys:
             node = GeoNode(y, x, leaf=False)

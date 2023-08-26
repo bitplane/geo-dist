@@ -6,7 +6,7 @@ from geo_dist_prep.geotree import Tree
 from geo_dist_prep.geotree.data import NODE_PAIRS, TREE_FILE
 
 
-def create_data():
+def create_pairs():
     tree: Tree = pickle.load(open(TREE_FILE, "rb"))
     max_distance = 250_000
 
@@ -17,7 +17,7 @@ def create_data():
 
 
 def write_data(fout):
-    for row in create_data():
+    for row in create_pairs():
         fout.write("\t".join(str(field) or "" for field in row) + "\n")
 
 
