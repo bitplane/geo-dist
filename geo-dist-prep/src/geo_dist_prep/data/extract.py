@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 import pickle
 
+from geo_dist_prep.data import NODE_PAIRS, TREE_FILE
 from geo_dist_prep.geotree import Tree
-from geo_dist_prep.geotree.data import NODE_PAIRS, TREE_FILE
 
 
 def create_pairs():

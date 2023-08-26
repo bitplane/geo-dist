@@ -4,8 +4,8 @@ import csv
 import pickle
 import sys
 
+from geo_dist_prep.data import FILTERED_FILE, TREE_FILE
 from geo_dist_prep.geotree import Tree
-from geo_dist_prep.geotree.data import FILTERED_FILE, TREE_FILE
 
 
 def load_tree(infile):

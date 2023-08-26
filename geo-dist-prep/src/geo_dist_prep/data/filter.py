@@ -4,7 +4,7 @@ import gzip
 import re
 import sys
 
-from geo_dist_prep.geotree.data import COLUMNS, FILTERED_FILE, GEONAMES_FILE
+from geo_dist_prep.data import COLUMNS, FILTERED_FILE, GEONAMES_FILE
 
 filters = {
     "osm_type": r"node",
