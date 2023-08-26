@@ -13,10 +13,12 @@ dependencies = [
     "pygeohash",
     "jupyter",
     "tensorflow",
+    "tensorrt",
     "scikit-learn",
     "httpx[http2]",
     "matplotlib",
-    "pandas"
+    "pandas",
+    "ipython"
 ]
 
 [project.optional-dependencies]

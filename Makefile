@@ -6,11 +6,11 @@
 
 SRC_DIR := geo-dist-prep/src/geo_dist_prep/
 
-FILTERED_FILE := $(shell python $(SRC_DIR)geotree/data.py FILTERED_FILE)
-TREE_FILE := $(shell python $(SRC_DIR)geotree/data.py TREE_FILE)
-NODE_PAIRS := $(shell python $(SRC_DIR)geotree/data.py NODE_PAIRS)
-DIST_DATA := $(shell python $(SRC_DIR)geotree/data.py DIST_DATA)
-NORMALIZED_DATA := $(shell python $(SRC_DIR)geotree/data.py NORMALIZED_DATA)
+FILTERED_FILE := $(shell python $(SRC_DIR)data/__init__.py FILTERED_FILE)
+TREE_FILE := $(shell python $(SRC_DIR)data/__init__.py TREE_FILE)
+NODE_PAIRS := $(shell python $(SRC_DIR)data/__init__.py NODE_PAIRS)
+DIST_DATA := $(shell python $(SRC_DIR)data/__init__.py DIST_DATA)
+NORMALIZED_DATA := $(shell python $(SRC_DIR)data/__init__.py NORMALIZED_DATA)
 
 GEOTREE_SRC := $(shell find $(SRC_DIR)geotree -type f -name '*.py')
 
