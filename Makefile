@@ -2,22 +2,20 @@
 .PHONY: help all install test dev coverage clean \
 		pre-commit update-pre-commit
 
-.ONESHELL:  # run all commands in the same shell
-
 # get constants from Python source
 
 SRC_DIR := geo-dist-prep/src/geo_dist_prep/
 
 GEONAMES_FILE := $(shell python $(SRC_DIR)data/__init__.py GEONAMES_FILE)
 GEONAMES_DB := $(shell python $(SRC_DIR)data/__init__.py GEONAMES_DB)
+SCORE_SENTINEL := $(shell python $(SRC_DIR)data/__init__.py SCORE_SENTINEL)
 
-TREE_FILE := $(shell python $(SRC_DIR)data/__init__.py TREE_FILE)
 NODE_PAIRS := $(shell python $(SRC_DIR)data/__init__.py NODE_PAIRS)
 DIST_DATA := $(shell python $(SRC_DIR)data/__init__.py DIST_DATA)
 NORMALIZED_DATA := $(shell python $(SRC_DIR)data/__init__.py NORMALIZED_DATA)
 
 
-all: $(GEONAMES_DB)
+all: $(SCORE_SENTINEL)
 
 install: .venv/.installed  ## installs the venv and the project packages
 
@@ -61,12 +59,12 @@ $(GEONAMES_FILE).done: build/download-geonames.sh
 $(GEONAMES_DB): $(GEONAMES_FILE).done build/data.sh $(SRC_DIR)/data/load.py $(SRC_DIR)/schemas/geoname.py
 	build/data.sh load
 
-# 3. Build it into a quad-tree
-$(TREE_FILE): $(FILTERED_FILE) $(SRC_DIR)/data/build.py $(GEOTREE_SRC)
+# 3. Score the rows, building a tree
+$(SCORE_SENTINEL): $(GEONAMES_DB) $(SRC_DIR)/data/score.py
 	build/data.sh build
 
 # 4. Extract nearby nodes from the tree into pairs
-$(NODE_PAIRS): $(TREE_FILE) $(SRC_DIR)/data/extract.py $(GEOTREE_SRC)
+$(NODE_PAIRS): $(TREE_FILE) $(SRC_DIR)/data/extract.py
 	build/data.sh extract
 
 # 5. Add location data using openrouteservice

@@ -27,7 +27,9 @@ class GeoName(Base):
     place_rank = Column(Integer)
     importance = Column(Float)
     country_code = Column(String)
+    score = Column(Integer, default=0)
 
 
 Index("lat_index", GeoName.lat)
 Index("lon_index", GeoName.lon)
+Index("score_index", GeoName.score)
