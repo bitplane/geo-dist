@@ -6,14 +6,14 @@ from .base import Base
 
 
 class PlaceType(IntEnum):
-    BOROUGH = 1
-    CITY = 2
-    HAMLET = 3
-    NEIGHBOURHOOD = 4
-    QUARTER = 5
-    SUBURB = 6
-    TOWN = 7
-    VILLAGE = 8
+    borough = 1
+    city = 2
+    hamlet = 3
+    neighbourhood = 4
+    quarter = 5
+    suburb = 6
+    town = 7
+    village = 8
 
 
 class GeoName(Base):

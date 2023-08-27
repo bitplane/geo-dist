@@ -16,9 +16,6 @@ NODE_PAIRS := $(shell python $(SRC_DIR)data/__init__.py NODE_PAIRS)
 DIST_DATA := $(shell python $(SRC_DIR)data/__init__.py DIST_DATA)
 NORMALIZED_DATA := $(shell python $(SRC_DIR)data/__init__.py NORMALIZED_DATA)
 
-GEOTREE_SRC := $(shell find $(SRC_DIR)geotree -type f -name '*.py')
-
-# SOURCE_FILES := $(shell find . -type f -name '*.py')
 
 all: $(GEONAMES_DB)
 
