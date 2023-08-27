@@ -1,21 +1,19 @@
-from geo_dist_prep.schemas.base import Base
-from sqlalchemy import Column, Float, Integer, String
+from enum import Enum as PyEnum
 
-dropped_columns = [
-    "alternative_names",
-    "street" "city",
-    "county",
-    "state",
-    "country",
-    "display_name",
-    "west",
-    "south",
-    "east",
-    "north",
-    "wikidata",
-    "wikipedia",
-    "housenumbers",
-]
+from sqlalchemy import Column, Enum, Float, Integer, String
+
+from .base import Base
+
+
+class PlaceType(PyEnum):
+    BOROUGH = "borough"
+    CITY = "city"
+    HAMLET = "hamlet"
+    NEIGHBOURHOOD = "neighbourhood"
+    QUARTER = "quarter"
+    SUBURB = "suburb"
+    TOWN = "town"
+    VILLAGE = "village"
 
 
 class GeoName(Base):
@@ -23,9 +21,7 @@ class GeoName(Base):
 
     osm_id = Column(Integer, primary_key=True)
     name = Column(String)
-    osm_type = Column(String)
-    class_ = Column("class", String)
-    type_ = Column("type", String)
+    type_ = Column(Enum(PlaceType))
     lon = Column(Float)
     lat = Column(Float)
     place_rank = Column(Integer)

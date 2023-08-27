@@ -53,9 +53,8 @@ def load_geonames(filters):
         if filtered or not row["lat"] or not row["lon"]:
             continue
 
+        row["type_"] = row.pop("type")
         data = {key: row[key] for key in GeoName.__table__.columns.keys()}
-        data["class_"] = data.pop("class")
-        data["type_"] = data.pop("type")
         geoname = GeoName(**data)
 
         session.add(geoname)
