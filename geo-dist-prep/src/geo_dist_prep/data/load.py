@@ -54,7 +54,7 @@ def load_geonames(filters):
             continue
 
         row["type_"] = row.pop("type")
-        data = {key: row[key] for key in GeoName.__table__.columns.keys()}
+        data = {key: row[key] for key in GeoName.__table__.columns.keys() if key in row}
         geoname = GeoName(**data)
 
         session.add(geoname)

@@ -57,18 +57,3 @@ def grid_coord(place, grid_size):
     x = func.floor((lon_to_km(place.lat, place.lon) + x_offset_km) / grid_size)
 
     return func.cast(y * max_y + x, Integer)
-
-
-# # delete duplicate grid coords
-# grid_size = 1
-# grid_column = grid_coord(GeoName, grid_size).label('grid_coord')
-# table_plus_grid = session.query(GeoName).add_columns(grid_column)
-# distinct_by_grid = table_plus_grid.group_by('grid_coord').distinct()
-# non_distinct_rows = table_plus_grid.except_(distinct_by_grid)
-# ids_to_delete = [x[0] for x in non_distinct_rows.with_entities(GeoName.osm_id).all()]
-# # delete in chunks
-# chunk_size = 999
-# for i in range(0, len(ids_to_delete), chunk_size):
-#     chunk_ids = ids_to_delete[i:i+chunk_size]
-#     session.query(GeoName).filter(GeoName.osm_id.in_(chunk_ids)).delete(synchronize_session='fetch')
-# session.commit()
