@@ -59,23 +59,23 @@ $(GEONAMES_FILE).done: build/download-geonames.sh
 $(GEONAMES_DB): $(GEONAMES_FILE).done build/data.sh $(SRC_DIR)/data/load.py $(SRC_DIR)/schemas/geoname.py
 	build/data.sh load
 
-# 3. Score the rows, building a tree
+# 3. Score the rows, building a tree for searching
 $(SCORE_SENTINEL): $(GEONAMES_DB) $(SRC_DIR)/data/score.py
-	build/data.sh build
+	build/data.sh score
 
-# 4. Extract nearby nodes from the tree into pairs
-$(NODE_PAIRS): $(TREE_FILE) $(SRC_DIR)/data/extract.py
-	build/data.sh extract
+# # 4. Extract nearby nodes from the tree into pairs
+# $(NODE_PAIRS): $(TREE_FILE) $(SRC_DIR)/data/extract.py
+# 	build/data.sh extract
 
-# 5. Add location data using openrouteservice
-$(DIST_DATA): $(NODE_PAIRS) $(SRC_DIR)/data/enrich.py
-	build/data.sh enrich
+# # 5. Add location data using openrouteservice
+# $(DIST_DATA): $(NODE_PAIRS) $(SRC_DIR)/data/enrich.py
+# 	build/data.sh enrich
 
-# 6. Normalize the data for training
-$(NORMALIZED_DATA): $(DIST_DATA) $(SRC_DIR)/data/normalize.py
-	build/data.sh normalize
+# # 6. Normalize the data for training
+# $(NORMALIZED_DATA): $(DIST_DATA) $(SRC_DIR)/data/normalize.py
+# 	build/data.sh normalize
 
-# 7. Train the model
+# # 7. Train the model
 
 
 # 8. Start the web service!
