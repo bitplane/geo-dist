@@ -1,19 +1,19 @@
-from enum import Enum as PyEnum
+from enum import IntEnum
 
-from sqlalchemy import Column, Enum, Float, Integer, String
+from sqlalchemy import Column, Enum, Float, Index, Integer, String
 
 from .base import Base
 
 
-class PlaceType(PyEnum):
-    BOROUGH = "borough"
-    CITY = "city"
-    HAMLET = "hamlet"
-    NEIGHBOURHOOD = "neighbourhood"
-    QUARTER = "quarter"
-    SUBURB = "suburb"
-    TOWN = "town"
-    VILLAGE = "village"
+class PlaceType(IntEnum):
+    BOROUGH = 1
+    CITY = 2
+    HAMLET = 3
+    NEIGHBOURHOOD = 4
+    QUARTER = 5
+    SUBURB = 6
+    TOWN = 7
+    VILLAGE = 8
 
 
 class GeoName(Base):
@@ -27,3 +27,7 @@ class GeoName(Base):
     place_rank = Column(Integer)
     importance = Column(Float)
     country_code = Column(String)
+
+
+Index("lat_index", GeoName.lat)
+Index("lon_index", GeoName.lon)
