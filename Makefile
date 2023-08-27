@@ -2,11 +2,15 @@
 .PHONY: help all install test dev coverage clean \
 		pre-commit update-pre-commit
 
+.ONESHELL:  # run all commands in the same shell
+
 # get constants from Python source
 
 SRC_DIR := geo-dist-prep/src/geo_dist_prep/
 
-FILTERED_FILE := $(shell python $(SRC_DIR)data/__init__.py FILTERED_FILE)
+GEONAMES_FILE := $(shell python $(SRC_DIR)data/__init__.py GEONAMES_FILE)
+GEONAMES_DB := $(shell python $(SRC_DIR)data/__init__.py GEONAMES_DB)
+
 TREE_FILE := $(shell python $(SRC_DIR)data/__init__.py TREE_FILE)
 NODE_PAIRS := $(shell python $(SRC_DIR)data/__init__.py NODE_PAIRS)
 DIST_DATA := $(shell python $(SRC_DIR)data/__init__.py DIST_DATA)
@@ -16,7 +20,7 @@ GEOTREE_SRC := $(shell find $(SRC_DIR)geotree -type f -name '*.py')
 
 # SOURCE_FILES := $(shell find . -type f -name '*.py')
 
-all: $(NORMALIZED_DATA)
+all: $(GEONAMES_DB)
 
 install: .venv/.installed  ## installs the venv and the project packages
 
@@ -41,7 +45,7 @@ update-pre-commit: build/update-pre-commit.sh  ## autoupdate pre-commit
 .venv/.installed: */pyproject.toml .venv/bin/activate build/install.sh
 	build/install.sh
 
-.venv/bin/activate:
+.venv/bin/activate: build/venv.sh
 	build/venv.sh
 
 .git/hooks/pre-commit: build/install-pre-commit.sh
@@ -53,12 +57,12 @@ update-pre-commit: build/update-pre-commit.sh  ## autoupdate pre-commit
 
 
 # 1. download the geonames file
-.cache/geonames.tsv.gz.done: build/download-geonames.sh
-	build/download-geonames.sh
+$(GEONAMES_FILE).done: build/download-geonames.sh
+	build/download-geonames.sh $(GEONAMES_FILE).done
 
-# 2. filter out names we don't want
-$(FILTERED_FILE): .cache/geonames.tsv.gz.done build/data.sh $(SRC_DIR)/data/filter.py
-	build/data.sh filter
+# 2. Import into a sqlite database
+$(GEONAMES_DB): $(GEONAMES_FILE).done build/data.sh $(SRC_DIR)/data/load.py $(SRC_DIR)/schemas/geoname.py
+	build/data.sh load
 
 # 3. Build it into a quad-tree
 $(TREE_FILE): $(FILTERED_FILE) $(SRC_DIR)/data/build.py $(GEOTREE_SRC)

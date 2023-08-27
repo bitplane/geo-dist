@@ -27,3 +27,13 @@ def bisection_sort(seq) -> list:
         output.append(seq[0])
 
     return output
+
+
+def format_int(num):
+    if num < 1000:
+        return f"{num:.2f}"
+    magnitude = 0
+    while abs(num) >= 1000 and magnitude < 5:
+        magnitude += 1
+        num /= 1000
+    return f"{num:.2f}{['', 'k', 'M', 'G', 'T'][magnitude]}"
