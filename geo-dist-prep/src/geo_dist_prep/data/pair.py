@@ -7,13 +7,15 @@ from geo_dist_prep.schemas.geoname_pair import GeoNamePair
 from geo_dist_prep.schemas.helpers import direction, distance, nearby
 from geo_dist_prep.schemas.job import GeoNamePairJob
 from sqlalchemy import Integer, create_engine, func, insert
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import Session, sessionmaker
 
 country_code = "gb"
 
 
-def insert_pairs(geoname: GeoName, job: GeoNamePairJob, session):
-    for dist in (10, 20, 40, 80, 160):
+def gather_pairs(geoname: GeoName, job: GeoNamePairJob, session: Session):
+    count = 5
+    total = 0
+    for dist in (10, 20, 40, 80, 160, 200, 250, 300, 350):
         select_statement = (
             session.query(
                 func.cast(job.id, Integer).label("job_id"),
@@ -33,6 +35,10 @@ def insert_pairs(geoname: GeoName, job: GeoNamePairJob, session):
             .order_by(func.random())
             .limit(5)
         )
+
+        # compiled_sql = select_statement.statement.compile(compile_kwargs={"literal_binds": True})
+        # results = session.bind.execute(compiled_sql).fetchall()
+
         insert_statement = (
             insert(GeoNamePair)
             .prefix_with("OR IGNORE")
@@ -41,15 +47,23 @@ def insert_pairs(geoname: GeoName, job: GeoNamePairJob, session):
                 select_statement,
             )
         )
-        session.execute(insert_statement)
+        inserted = session.execute(insert_statement).rowcount
+
+        if inserted:
+            total += inserted
+            count -= 1
+            if count == 0:
+                break
+
+    return total
 
 
 def create_pairs(country_code):
     engine = create_engine(f"sqlite:///{GEONAMES_DB}")
 
     Base.metadata.create_all(engine)
-    Session = sessionmaker(bind=engine)
-    session = Session()
+    SessionMeker = sessionmaker(bind=engine)
+    session = SessionMeker()
 
     # Start the job
     job = GeoNamePairJob(country_code=country_code)
@@ -67,7 +81,7 @@ def create_pairs(country_code):
         )
 
         for i, geoname in enumerate(geonames):
-            insert_pairs(geoname, job, session)
+            gather_pairs(geoname, job, session)
 
             if i % 100 == 0:
                 print(
@@ -89,5 +103,28 @@ def create_pairs(country_code):
         session.close()
 
 
+def get_missing_countries():
+    engine = create_engine(f"sqlite:///{GEONAMES_DB}")
+
+    Base.metadata.create_all(engine)
+    SessionMeker = sessionmaker(bind=engine)
+    session = SessionMeker()
+
+    jobs = (
+        session.query(GeoNamePairJob)
+        .filter(GeoNamePairJob.success == True)  # noqa
+        .all()
+    )
+    completed_codes = {job.country_code for job in jobs}
+    all_codes = {code for code, in session.query(GeoName.country_code).distinct().all()}
+    missing_codes = all_codes - completed_codes
+
+    return sorted(list(missing_codes))
+
+
 if __name__ == "__main__":
-    create_pairs(country_code)
+    missing_countries = get_missing_countries()
+    print("Missing countries:", len(missing_countries))
+
+    for country_code in missing_countries:
+        create_pairs(country_code)
