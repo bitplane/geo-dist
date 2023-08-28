@@ -1,32 +1,5 @@
-from math import pi
-
-degree_to_rad = float(pi / 180.0)
-
-
-def bisection_sort(seq) -> list:
-    """
-    Sort a seqence in a way that builds a balanced tree
-    """
-    seq = sorted(seq)
-    visited = set()
-
-    step = len(seq) // 2
-    pos = step
-    output = []
-
-    while step > 0:
-        for i in range(pos, len(seq), step):
-            if i in visited:
-                continue
-            output.append(seq[i])
-            visited.add(i)
-        step = step // 2
-        pos = step
-
-    if len(output) != len(seq):
-        output.append(seq[0])
-
-    return output
+from functools import wraps
+from time import time
 
 
 def format_int(num):
@@ -37,3 +10,16 @@ def format_int(num):
         magnitude += 1
         num /= 1000
     return f"{num:.2f}{['', 'k', 'M', 'G', 'T'][magnitude]}"
+
+
+def print_time(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        start_time = time()
+        result = f(*args, **kwargs)
+        end_time = time()
+        elapsed_time = end_time - start_time
+        print(f"{f.__name__} took {elapsed_time:.6f} seconds")
+        return result
+
+    return wrapper

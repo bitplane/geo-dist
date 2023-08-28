@@ -1,20 +1,27 @@
+from concurrent.futures import ProcessPoolExecutor, as_completed
 from datetime import datetime
+from functools import partial
 
 from geo_dist_prep.data import GEONAMES_DB
 from geo_dist_prep.schemas.base import Base
 from geo_dist_prep.schemas.geoname import GeoName
-from geo_dist_prep.schemas.geoname_pair import GeoNamePair
 from geo_dist_prep.schemas.helpers import direction, distance, nearby
 from geo_dist_prep.schemas.job import GeoNamePairJob
-from sqlalchemy import Integer, create_engine, func, insert
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy import Integer, create_engine, func, text
+from sqlalchemy.orm import sessionmaker
 
-country_code = "gb"
+# from geo_dist_prep.utils import print_time
 
 
-def gather_pairs(geoname: GeoName, job: GeoNamePairJob, session: Session):
+def gather_pairs(job: GeoNamePairJob, geoname: GeoName):
+    engine = create_engine(f"sqlite:///{GEONAMES_DB}")
+
+    SessionMaker = sessionmaker(bind=engine)
+    session = SessionMaker()
+    connection = engine.connect()
+
     count = 5
-    total = 0
+    res = []
     for dist in (10, 20, 40, 80, 160, 200, 250, 300, 350):
         select_statement = (
             session.query(
@@ -30,32 +37,42 @@ def gather_pairs(geoname: GeoName, job: GeoNamePairJob, session: Session):
             )
             .filter(
                 GeoName.score >= dist / 10,
+                GeoName.osm_id != geoname.osm_id,
                 nearby(geoname.lat, geoname.lon, dist),
             )
             .order_by(func.random())
             .limit(5)
         )
 
-        # compiled_sql = select_statement.statement.compile(compile_kwargs={"literal_binds": True})
-        # results = session.bind.execute(compiled_sql).fetchall()
-
-        insert_statement = (
-            insert(GeoNamePair)
-            .prefix_with("OR IGNORE")
-            .from_select(
-                ["job_id", "start_id", "end_id", "distance", "direction"],
-                select_statement,
-            )
+        compiled_sql = select_statement.statement.compile(
+            compile_kwargs={"literal_binds": True}
         )
-        inserted = session.execute(insert_statement).rowcount
+        results = connection.execute(compiled_sql).fetchall()
+        res.extend(tuple(result) for result in results)
 
-        if inserted:
-            total += inserted
+        if results:
             count -= 1
             if count == 0:
                 break
 
-    return total
+    connection.close()
+    session.close()
+    return res
+
+
+def insert_pairs(session, pairs):
+    session.execute(
+        text(
+            "INSERT OR IGNORE INTO geoname_pair "
+            "(job_id, start_id, end_id, distance, direction) "
+            "VALUES (:job_id, :start_id, :end_id, :distance, :direction)"
+        ),
+        [
+            dict(zip(("job_id", "start_id", "end_id", "distance", "direction"), pair))
+            for pair in pairs
+        ],
+    )
+    session.commit()
 
 
 def create_pairs(country_code):
@@ -68,8 +85,7 @@ def create_pairs(country_code):
     # Start the job
     job = GeoNamePairJob(country_code=country_code)
     session.add(job)
-    session.commit()
-    print("started job: ", job.id)
+    print("pair job:", job.id, "for", country_code)
 
     try:
         # Get all geonames in the country
@@ -79,16 +95,39 @@ def create_pairs(country_code):
             .order_by(GeoName.osm_id)
             .all()
         )
+        print(f"pair job: {job.id} for {country_code} - with {len(geonames)} geonames")
 
-        for i, geoname in enumerate(geonames):
-            gather_pairs(geoname, job, session)
+        gather_and_extend = partial(gather_pairs, job)
 
-            if i % 100 == 0:
-                print(
-                    f"{datetime.now().isoformat()}: pair job {job.id}: committing {i} of {len(geonames)}"
-                )
-                session.commit()
+        pairs = []
 
+        with ProcessPoolExecutor() as executor:
+            future_to_geoname = {
+                executor.submit(gather_and_extend, geoname): geoname
+                for geoname in geonames
+            }
+            last_percent = 0
+            start = datetime.now()
+
+            for i, future in enumerate(as_completed(future_to_geoname)):
+                new_pairs = future.result()
+                pairs.extend(new_pairs)
+                percent = (i + 1) / len(geonames) * 100
+
+                if percent - last_percent > 1:
+                    t = datetime.now()
+                    remaining_pc = float(100 - percent)
+                    mins_so_far = (t - start).seconds / 60
+                    remaining = round(mins_so_far / percent * remaining_pc, 2)
+                    last_percent = percent
+                    print(
+                        f"pair job: gathering for {country_code} - "
+                        f"{int(percent)}% ({len(pairs)} pairs), "
+                        f"{remaining} mins to go"
+                    )
+
+        print(f"pair job: inserting {len(pairs)} pairs for {country_code}")
+        insert_pairs(session, pairs)
         job.success = True
         session.commit()
 
@@ -96,6 +135,7 @@ def create_pairs(country_code):
         print(e)
         session.rollback()
         job.message = str(e)
+        raise
 
     finally:
         job.finished = int(datetime.now().timestamp())
@@ -117,7 +157,7 @@ def get_missing_countries():
     )
     completed_codes = {job.country_code for job in jobs}
     all_codes = {code for code, in session.query(GeoName.country_code).distinct().all()}
-    missing_codes = all_codes - completed_codes
+    missing_codes = all_codes - completed_codes - {""}
 
     return sorted(list(missing_codes))
 
