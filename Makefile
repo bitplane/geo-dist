@@ -64,7 +64,7 @@ $(SCORE_SENTINEL): $(GEONAMES_DB) $(SRC_DIR)/data/score.py
 	build/data.sh score
 
 # 4. Extract nodes from the tree into pairs
-$(PAIR_SENTINEL): $(TREE_FILE) $(SRC_DIR)/data/pair.py
+$(PAIR_SENTINEL): $(SCORE_SENTINEL) $(SRC_DIR)/data/pair.py
 	build/data.sh pair
 
 # # 5. Add location data using openrouteservice
