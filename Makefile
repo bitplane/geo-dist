@@ -9,7 +9,7 @@ SRC_DIR := geo-dist-prep/src/geo_dist_prep/
 GEONAMES_FILE := $(shell python3 $(SRC_DIR)data/__init__.py GEONAMES_FILE)
 GEONAMES_DB := $(shell python3 $(SRC_DIR)data/__init__.py GEONAMES_DB)
 SCORE_SENTINEL := $(shell python3 $(SRC_DIR)data/__init__.py SCORE_SENTINEL)
-PAIR_SENTINEL := $(shell python3 $(SRC_DIR)data/__init__.py PAIRS_SENTINEL)
+PAIR_SENTINEL := $(shell python3 $(SRC_DIR)data/__init__.py PAIR_SENTINEL)
 
 DIST_DATA := $(shell python3 $(SRC_DIR)data/__init__.py DIST_DATA)
 NORMALIZED_DATA := $(shell python3 $(SRC_DIR)data/__init__.py NORMALIZED_DATA)

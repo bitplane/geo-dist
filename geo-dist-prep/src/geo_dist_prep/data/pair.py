@@ -2,7 +2,7 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from datetime import datetime
 from functools import partial
 
-from geo_dist_prep.data import GEONAMES_DB
+from geo_dist_prep.data import GEONAMES_DB, PAIR_SENTINEL
 from geo_dist_prep.schemas.base import Base
 from geo_dist_prep.schemas.geoname import GeoName
 from geo_dist_prep.schemas.helpers import direction, distance, nearby
