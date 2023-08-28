@@ -6,16 +6,16 @@
 
 SRC_DIR := geo-dist-prep/src/geo_dist_prep/
 
-GEONAMES_FILE := $(shell python $(SRC_DIR)data/__init__.py GEONAMES_FILE)
-GEONAMES_DB := $(shell python $(SRC_DIR)data/__init__.py GEONAMES_DB)
-SCORE_SENTINEL := $(shell python $(SRC_DIR)data/__init__.py SCORE_SENTINEL)
+GEONAMES_FILE := $(shell python3 $(SRC_DIR)data/__init__.py GEONAMES_FILE)
+GEONAMES_DB := $(shell python3 $(SRC_DIR)data/__init__.py GEONAMES_DB)
+SCORE_SENTINEL := $(shell python3 $(SRC_DIR)data/__init__.py SCORE_SENTINEL)
 
-NODE_PAIRS := $(shell python $(SRC_DIR)data/__init__.py NODE_PAIRS)
-DIST_DATA := $(shell python $(SRC_DIR)data/__init__.py DIST_DATA)
-NORMALIZED_DATA := $(shell python $(SRC_DIR)data/__init__.py NORMALIZED_DATA)
+NODE_PAIRS := $(shell python3 $(SRC_DIR)data/__init__.py NODE_PAIRS)
+DIST_DATA := $(shell python3 $(SRC_DIR)data/__init__.py DIST_DATA)
+NORMALIZED_DATA := $(shell python3 $(SRC_DIR)data/__init__.py NORMALIZED_DATA)
 
 
-all: $(SCORE_SENTINEL)
+all: dev $(SCORE_SENTINEL)
 
 install: .venv/.installed  ## installs the venv and the project packages
 
