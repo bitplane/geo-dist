@@ -63,8 +63,8 @@ $(GEONAMES_DB): $(GEONAMES_FILE).done build/data.sh $(SRC_DIR)/data/load.py $(SR
 $(SCORE_SENTINEL): $(GEONAMES_DB) $(SRC_DIR)/data/score.py
 	build/data.sh score
 
-# # 4. Extract nearby nodes from the tree into pairs
-# $(NODE_PAIRS): $(TREE_FILE) $(SRC_DIR)/data/extract.py
+# # 4. Extract nodes from the tree into pairs
+# $(NODE_PAIRS): $(TREE_FILE) $(SRC_DIR)/data/pair.py
 # 	build/data.sh extract
 
 # # 5. Add location data using openrouteservice

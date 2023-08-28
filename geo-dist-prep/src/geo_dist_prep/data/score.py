@@ -18,7 +18,7 @@ def score_nodes():
     print("score: resetting scores")
     session.query(GeoName).update({GeoName.score: 0})
 
-    for grid_size in (1, 2, 4, 8, 16, 32):
+    for grid_size in (1, 2, 4, 8, 16, 32, 64, 128, 256):
         print("score: find important nodes in", grid_size, "km grid")
 
         grid_column = grid_coord(GeoName, grid_size).label("grid_coord")
