@@ -9,13 +9,13 @@ SRC_DIR := geo-dist-prep/src/geo_dist_prep/
 GEONAMES_FILE := $(shell python3 $(SRC_DIR)data/__init__.py GEONAMES_FILE)
 GEONAMES_DB := $(shell python3 $(SRC_DIR)data/__init__.py GEONAMES_DB)
 SCORE_SENTINEL := $(shell python3 $(SRC_DIR)data/__init__.py SCORE_SENTINEL)
+PAIR_SENTINEL := $(shell python3 $(SRC_DIR)data/__init__.py PAIRS_SENTINEL)
 
-NODE_PAIRS := $(shell python3 $(SRC_DIR)data/__init__.py NODE_PAIRS)
 DIST_DATA := $(shell python3 $(SRC_DIR)data/__init__.py DIST_DATA)
 NORMALIZED_DATA := $(shell python3 $(SRC_DIR)data/__init__.py NORMALIZED_DATA)
 
 
-all: dev $(SCORE_SENTINEL)
+all: dev $(PAIR_SENTINEL)
 
 install: .venv/.installed  ## installs the venv and the project packages
 
@@ -63,9 +63,9 @@ $(GEONAMES_DB): $(GEONAMES_FILE).done build/data.sh $(SRC_DIR)/data/load.py $(SR
 $(SCORE_SENTINEL): $(GEONAMES_DB) $(SRC_DIR)/data/score.py
 	build/data.sh score
 
-# # 4. Extract nodes from the tree into pairs
-# $(NODE_PAIRS): $(TREE_FILE) $(SRC_DIR)/data/pair.py
-# 	build/data.sh extract
+# 4. Extract nodes from the tree into pairs
+$(PAIR_SENTINEL): $(TREE_FILE) $(SRC_DIR)/data/pair.py
+	build/data.sh pair
 
 # # 5. Add location data using openrouteservice
 # $(DIST_DATA): $(NODE_PAIRS) $(SRC_DIR)/data/enrich.py

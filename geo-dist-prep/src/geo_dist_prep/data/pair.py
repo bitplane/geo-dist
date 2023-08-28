@@ -168,3 +168,6 @@ if __name__ == "__main__":
 
     for country_code in missing_countries:
         create_pairs(country_code)
+
+    with open(PAIR_SENTINEL, "wt") as fout:
+        fout.write(f"{datetime.now().isoformat()}")
