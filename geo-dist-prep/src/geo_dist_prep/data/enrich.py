@@ -78,6 +78,7 @@ def result(job_id, pair, distance, routable):
 def call_api(job_id, pairs):
     client = httpx.Client(http2=True)
 
+    max_retries = 5
     results = []
 
     for i, pair in enumerate(pairs):
@@ -87,17 +88,17 @@ def call_api(job_id, pairs):
         }
         response = None
         retry = 0
-        while not response and retry < 60:
+        while not response and retry < max_retries:
             try:
                 response = client.get(URL, params=params).json()
             except httpx.ReadTimeout:
-                print(f"timeout, retrying in {retry} seconds")
+                print(f"timeout, retrying in {retry} seconds", params)
                 time.sleep(retry)
                 retry += 1
                 client = httpx.Client(http2=True)
                 continue
 
-        if retry == 10:
+        if retry == max_retries:
             print("failed to get response, skipping")
             continue
 
