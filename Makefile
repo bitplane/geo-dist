@@ -61,7 +61,7 @@ $(GEONAMES_FILE).done: build/download-geonames.sh
 	build/data.sh pair
 
 # 5. Create docker compose environments
-.cache/docker.create.done: $(SRC_DIR)/data/docker/regions.py $(SRC_DIR)/data/docker/create.py
+.cache/docker.create.done: $(SRC_DIR)/data/docker/regions.py $(SRC_DIR)/data/docker/create.py $(SRC_DIR)/data/docker/ors-config.json $(SRC_DIR)/data/docker/docker-compose.yml
 	build/data.sh docker.create
 
 # 6. Add location data using openrouteservice

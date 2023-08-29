@@ -51,7 +51,7 @@
           },
           {
             "profiles": "driving-car, driving-hgv",
-            "value": 100000
+            "value": 350000
           }
         ],
         "maximum_range_time": [

@@ -45,7 +45,7 @@ def create_docker_environments():
 
         compose_file = compose_file_template.replace(
             "{{REGION_NAME}}", region.name.replace("_", "-")
-        )
+        ).replace("{{RAM}}", str(region.ram))
 
         with open(path + "/docker-compose.yml", "w") as fout:
             fout.write(compose_file)

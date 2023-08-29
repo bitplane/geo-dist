@@ -10,12 +10,13 @@ class Region:
 
 REGIONS = [
     Region(
-        name="britain_and_ireland",  # 1.84gb peak RAM (??)
+        name="britain_and_ireland",
         file="https://download.geofabrik.de/europe/britain-and-ireland-latest.osm.pbf",
         codes={code for code in ("gb|ie|im|gg|je").split("|")},
+        ram=2,  # 1.84gb peak RAM
     ),
     Region(
-        name="africa",  # ?? peak RAM (5.01gb)
+        name="africa",
         file="https://download.geofabrik.de/africa-latest.osm.pbf",
         codes={
             code
@@ -25,14 +26,16 @@ REGIONS = [
                 "rw|st|sn|sc|sl|so|za|ss|sd|tz|tg|tn|ug|eh|zm|zw"
             ).split("|")
         },
+        ram=8,  # ?? peak RAM (5.01gb)
     ),
     Region(
-        name="antarctica",  # 0.46gb peak RAM
+        name="antarctica",
         file="https://download.geofabrik.de/antarctica-latest.osm.pbf",
         codes={"tf", "gs", "aq"},
+        ram=1,  # 0.46gb peak RAM
     ),
     Region(
-        name="asia",  # 18.5gb peak RAM
+        name="asia",
         file="https://download.geofabrik.de/asia-latest.osm.pbf",
         codes={
             code
@@ -42,9 +45,10 @@ REGIONS = [
                 "kr|lk|sy|tj|th|tl|tm|tr|ae|uz|vn|ye"
             ).split("|")
         },
+        ram=20,  # 18.5gb peak RAM (??) (13gb file)
     ),
     Region(
-        name="australia_oceania",  # 1.22gb peak RAM
+        name="australia_oceania",
         file="https://download.geofabrik.de/australia-oceania-latest.osm.pbf",
         codes={
             code
@@ -53,9 +57,10 @@ REGIONS = [
                 "to|tv|vu|wf|um"
             ).split("|")
         },
+        ram=2,  # 1.22gb peak RAM
     ),
     Region(
-        name="europe",  # ???? too big!
+        name="europe",
         file="https://download.geofabrik.de/europe-latest.osm.pbf",
         codes={
             code
@@ -65,11 +70,13 @@ REGIONS = [
                 "sm|rs|sk|si|es|se|ch|ua|gb|va"
             ).split("|")
         },
+        ram=60,  # ???? too big! file is 28g
     ),
     Region(
-        name="central_america",  # 1.12gb peak RAM (580mb)
+        name="central_america",
         file="https://download.geofabrik.de/central-america-latest.osm.pbf",
         codes={code for code in ("bz|cr|sv|gt|hn|ni|pa").split("|")},
+        ram=2,  # 1.12gb peak RAM (580mb)
     ),
     Region(
         name="north_america",
@@ -81,11 +88,13 @@ REGIONS = [
                 "cu|pr|kn|lc|pm|vc|tt|tc|us|vi"
             ).split("|")
         },
+        ram=24,  # guess about 20gb to 22gb?
     ),
     Region(
-        name="south_america",  #
+        name="south_america",
         file="https://download.geofabrik.de/south-america-latest.osm.pbf",
         codes={code for code in ("ar|bo|br|cl|co|ec|fk|gy|py|pe|sr|uy|ve").split("|")},
+        ram=8,  # 5.65gb peak RAM (3.87gb)
     ),
 ]
 
