@@ -6,6 +6,7 @@ class Region:
     name: str
     file: str
     codes: set[str]
+    ram: int
 
 
 REGIONS = [
