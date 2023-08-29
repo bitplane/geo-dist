@@ -18,7 +18,7 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.orm import Session, sessionmaker
 
 URL = "http://localhost:8080/ors/v2/directions/driving-car"
-BATCH_SIZE = 1000
+BATCH_SIZE = 100_000
 
 
 def insert_data(session: Session, rows):
