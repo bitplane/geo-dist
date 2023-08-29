@@ -4,7 +4,8 @@ from functools import partial
 
 from geo_dist_prep.data import GEONAMES_DB, PAIR_SENTINEL
 from geo_dist_prep.schemas.base import Base
-from geo_dist_prep.schemas.geoname import GeoName, GeoNamePair
+from geo_dist_prep.schemas.geoname import GeoName
+from geo_dist_prep.schemas.geoname_pair import GeoNamePair
 from geo_dist_prep.schemas.helpers import direction, distance, nearby
 from geo_dist_prep.schemas.job import GeoNamePairJob
 from sqlalchemy import Integer, create_engine, func, text
