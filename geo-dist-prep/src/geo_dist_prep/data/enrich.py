@@ -12,6 +12,7 @@ from geo_dist_prep.normalize import normalize_coords
 from geo_dist_prep.schemas.geoname import GeoName
 from geo_dist_prep.schemas.geoname_pair import GeoNamePair
 from geo_dist_prep.schemas.job import Base, GeoNameEnrichJob, GeoNamePairJob
+from geo_dist_prep.schemas.training_data import TrainingData  # noqa
 from geo_dist_prep.utils import chunks
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import Session, sessionmaker
@@ -26,7 +27,7 @@ def insert_data(session: Session, rows):
 
     session.execute(
         text(
-            "INSERT OR IGNORE INTO test_data "
+            "INSERT OR IGNORE INTO training_data "
             "(job_id, start_id, end_id, y1, x1, y2, x2, direction, distance) "
             "VALUES (:job_id, :start_id, :end_id, :y1, :x1, :y2, :x2, :direction, :distance)"
         ),
