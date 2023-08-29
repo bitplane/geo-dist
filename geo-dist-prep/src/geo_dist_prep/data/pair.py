@@ -181,6 +181,6 @@ if __name__ == "__main__":
     print("Missing countries:", len(missing_countries))
 
     for country_code in missing_countries:
-        create_pairs("br")
+        create_pairs(country_code)
 
     print("pair: Finished at", datetime.now().isoformat())
