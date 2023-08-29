@@ -18,7 +18,8 @@ dependencies = [
     "matplotlib",
     "pandas",
     "ipython",
-    "sqlalchemy"
+    "sqlalchemy",
+    "psutil"
 ]
 
 [project.optional-dependencies]
