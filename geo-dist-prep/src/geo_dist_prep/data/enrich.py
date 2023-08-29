@@ -1,35 +1,71 @@
 import json
+import os
 from concurrent.futures import ProcessPoolExecutor
+from datetime import datetime
+from functools import partial
 
 import httpx
 from geo_dist_prep.data import GEONAMES_DB
 from geo_dist_prep.data.docker.regions import group_countries_by_region
 from geo_dist_prep.data.docker.run import running_docker_container
+from geo_dist_prep.normalize import normalize_coords
 from geo_dist_prep.schemas.geoname import GeoName
 from geo_dist_prep.schemas.geoname_pair import GeoNamePair
 from geo_dist_prep.schemas.job import Base, GeoNameEnrichJob, GeoNamePairJob
 from geo_dist_prep.utils import chunks
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy import create_engine, text
+from sqlalchemy.orm import Session, sessionmaker
 
-url = "http://localhost:8080/ors/v2/directions/driving-car"
+URL = "http://localhost:8080/ors/v2/directions/driving-car"
+BATCH_SIZE = 10_000
 
 
-def call_api(pairs):
+def insert_data(session: Session, rows):
+    if not rows:
+        return
+
+    session.execute(
+        text(
+            "INSERT OR IGNORE INTO test_data "
+            "(job_id, start_id, end_id, y1, x1, y2, x2, direction, distance) "
+            "VALUES (:job_id, :start_id, :end_id, :y1, :x1, :y2, :x2, :direction, :distance)"
+        ),
+        [
+            dict(
+                zip(
+                    (
+                        "job_id",
+                        "start_id",
+                        "end_id",
+                        "y1",
+                        "x1",
+                        "y2",
+                        "x2",
+                        "direction",
+                        "distance",
+                    ),
+                    row,
+                )
+            )
+            for row in rows
+        ],
+    )
+    session.commit()
+
+
+def call_api(job_id, pairs):
     client = httpx.Client(http2=True)
 
     results = []
 
     for i, pair in enumerate(pairs):
-        if i % 1000 == 0:
-            print("enrich: pair", i)
         params = {
             "start": f"{pair.lon1},{pair.lat1}",
             "end": f"{pair.lon2},{pair.lat2}",
         }
         response = None
 
-        response = client.get(url, params=params).json()
+        response = client.get(URL, params=params).json()
         distance = -1.0
 
         if "error" in response:
@@ -51,14 +87,19 @@ def call_api(pairs):
             print(json.dumps(response, indent=2))
             continue
 
+        y1, x1 = normalize_coords(pair.lat1, pair.lon1)
+        y2, x2 = normalize_coords(pair.lat2, pair.lon2)
+
         results.append(
             [
+                job_id,
                 pair.start_id,
                 pair.end_id,
-                pair.lat1,
-                pair.lon1,
-                pair.lat2,
-                pair.lon2,
+                y1,
+                x1,
+                y2,
+                x2,
+                pair.direction,
                 distance,
             ]
         )
@@ -81,11 +122,7 @@ def enrich_country(country_code):
         .all()
     )[0]
 
-    print("enrich: enriching", country_code, "from pair job", pair_job.id)
-
-    # job = GeoNameEnrichJob()
-    # job.pair_job_id = pair_jobs[0].id
-    # session.add(job)
+    print("enrich: from pair job", pair_job.id)
 
     start_query = session.query(
         GeoName.osm_id.label("id1"),
@@ -105,18 +142,55 @@ def enrich_country(country_code):
             GeoNamePair.job_id,
             GeoNamePair.start_id,
             GeoNamePair.end_id,
+            GeoNamePair.direction,
             start_query,
             end_query,
         )
         .filter(GeoNamePair.job_id == pair_job.id)
         .join(start_query, start_query.c.id1 == GeoNamePair.start_id)
         .join(end_query, end_query.c.id2 == GeoNamePair.end_id)
-    )
+    ).all()
+
+    batch_size = BATCH_SIZE
+
+    job = GeoNameEnrichJob()
+    job.pair_job_id = pair_job.id
+    session.add(job)
+    print("enrich: created enrich job", job.id)
+
+    if len(pairs) < batch_size:
+        batch_size = int(len(pairs) / os.cpu_count()) + 1
+        print("enrich: data starved, batch size reduced to", batch_size)
+
+    total = len(pairs)
+    processed = 0
+    start = datetime.now()
+
+    call_api_job = partial(call_api, job.id)
 
     with ProcessPoolExecutor() as executor:
-        for results in executor.map(call_api, chunks(pairs, 10_000)):
-            for row in results:
-                print("\t".join(row))
+        for results in executor.map(call_api_job, chunks(pairs, batch_size)):
+            insert_data(session, results)
+
+            processed += len(results)
+            print("enrich:", processed, "/", total, "pairs processed")
+
+    end = datetime.now()
+    total_s = (end - start).seconds + 0.001
+
+    print(
+        "enrich: finished processing", country_code, ",", processed, "of", total, "ok."
+    )
+    print(
+        "enrich: took",
+        int(total_s),
+        "seconds;",
+        round(total / total_s, 2),
+        "requests per second",
+    )
+
+    job.success = True
+    session.commit()
 
 
 def get_pending_countries():
