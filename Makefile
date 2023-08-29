@@ -7,15 +7,8 @@
 SRC_DIR := geo-dist-prep/src/geo_dist_prep/
 
 GEONAMES_FILE := $(shell python3 $(SRC_DIR)data/__init__.py GEONAMES_FILE)
-GEONAMES_DB_LOADED := $(shell python3 $(SRC_DIR)data/__init__.py GEONAMES_DB_LOADED)
-SCORED := $(shell python3 $(SRC_DIR)data/__init__.py SCORED)
-PAIRED := $(shell python3 $(SRC_DIR)data/__init__.py PAIRED)
 
-DIST_DATA := $(shell python3 $(SRC_DIR)data/__init__.py DIST_DATA)
-NORMALIZED_DATA := $(shell python3 $(SRC_DIR)data/__init__.py NORMALIZED_DATA)
-
-
-all: dev $(PAIRED)
+all: .cache/docker.create.done
 
 install: .venv/.installed  ## installs the venv and the project packages
 
@@ -56,30 +49,30 @@ $(GEONAMES_FILE).done: build/download-geonames.sh
 	build/download-geonames.sh $(GEONAMES_FILE).done
 
 # 2. Import into a sqlite database
-$(GEONAMES_DB_LOADED): $(GEONAMES_FILE).done build/data.sh $(SRC_DIR)/data/load.py $(SRC_DIR)/schemas/geoname.py
+.cache/load.done: $(GEONAMES_FILE).done build/data.sh $(SRC_DIR)/data/load.py $(SRC_DIR)/schemas/geoname.py
 	build/data.sh load
 
 # 3. Score the rows, building a tree for searching
-$(SCORED): $(GEONAMES_DB_LOADED) $(SRC_DIR)/data/score.py
+.cache/score.done: .cache/load.done $(SRC_DIR)/data/score.py
 	build/data.sh score
 
 # 4. Extract nodes from the tree into pairs
-$(PAIRED): $(SCORED) $(SRC_DIR)/data/pair.py
+.cache/pair.done: .cache/score.done $(SRC_DIR)/data/pair.py
 	build/data.sh pair
 
-# # 5. Add location data using openrouteservice
+# 5. Create docker compose environments
+.cache/docker.create.done: $(SRC_DIR)/data/docker/regions.py $(SRC_DIR)/data/docker/create.py
+	build/data.sh docker.create
+
+# 6. Add location data using openrouteservice
 # $(DIST_DATA): $(NODE_PAIRS) $(SRC_DIR)/data/enrich.py
 # 	build/data.sh enrich
 
-# # 6. Normalize the data for training
+# 7. Normalize the data for training
 # $(NORMALIZED_DATA): $(DIST_DATA) $(SRC_DIR)/data/normalize.py
 # 	build/data.sh normalize
 
-# # 7. Train the model
-
-
-# 8. Start the web service!
-
+# 8. Train the model
 
 
 help: ## Show this help

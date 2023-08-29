@@ -6,7 +6,7 @@ import re
 import sys
 from datetime import datetime
 
-from geo_dist_prep.data import GEONAMES_DB, GEONAMES_DB_LOADED, GEONAMES_FILE
+from geo_dist_prep.data import GEONAMES_DB, GEONAMES_FILE
 from geo_dist_prep.schemas.base import Base
 from geo_dist_prep.schemas.geoname import GeoName
 from geo_dist_prep.utils import format_int
@@ -65,10 +65,8 @@ def load_geonames(filters):
     session.commit()
     session.close()
 
-    print(f"load: processed {format_int(total)} total rows, kept {kept}")
-
-    with open(GEONAMES_DB_LOADED, "wt") as fout:
-        fout.write(datetime.now().isoformat())
+    print("load: processed", format_int(total), "total rows, kept", kept)
+    print("load: finished at", datetime.now().isoformat())
 
 
 if __name__ == "__main__":

@@ -2,7 +2,7 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from datetime import datetime
 from functools import partial
 
-from geo_dist_prep.data import GEONAMES_DB, PAIRED
+from geo_dist_prep.data import GEONAMES_DB
 from geo_dist_prep.schemas.base import Base
 from geo_dist_prep.schemas.geoname import GeoName
 from geo_dist_prep.schemas.geoname_pair import GeoNamePair
@@ -181,7 +181,6 @@ if __name__ == "__main__":
     print("Missing countries:", len(missing_countries))
 
     for country_code in missing_countries:
-        create_pairs(country_code)
+        create_pairs("br")
 
-    with open(PAIRED, "wt") as fout:
-        fout.write(datetime.now().isoformat())
+    print("pair: Finished at", datetime.now().isoformat())
