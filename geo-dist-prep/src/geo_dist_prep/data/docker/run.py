@@ -19,7 +19,7 @@ def running_docker_container(container_name):
                 print(f"Waiting for {container_name}...")
                 time.sleep(5)
 
-        print("Ok! Let's go!")
+        print("Ready")
         yield
 
     finally:

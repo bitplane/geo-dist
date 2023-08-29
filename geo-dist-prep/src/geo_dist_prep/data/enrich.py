@@ -18,6 +18,24 @@ def road_distance(client, row):
     return response["features"][0]["properties"]["summary"]["distance"]
 
 
+def enrich(country_code):
+    print("enrich:", country_code)
+
+    engine = create_engine(f"sqlite:///{GEONAMES_DB}")
+
+    Base.metadata.create_all(engine)
+    Session = sessionmaker(bind=engine)
+    session = Session()
+
+    pair_jobs = (
+        session.query(GeoNamePairJob)
+        .filter(GeoNamePairJob.success, GeoNamePairJob.country_code == country_code)
+        .all()
+    )
+
+    print("enrich: enriching", country_code, "from pair job", pair_jobs[0].id)
+
+
 # def create_training_data():
 #     fin = open(NODE_PAIRS, "rt")
 #     reader = csv.DictReader(fin, delimiter="\t")
@@ -76,10 +94,6 @@ def get_pending_countries():
     session.close()
 
     return pending_countries
-
-
-def enrich(country_code):
-    raise NotImplementedError("TODO")
 
 
 def main():

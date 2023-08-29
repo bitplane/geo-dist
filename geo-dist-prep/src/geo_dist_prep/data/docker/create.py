@@ -28,7 +28,7 @@ def create_dirs(path):
 
 def create_docker_environments():
     with open(THIS_DIR + "/docker-compose.yml", "r") as fin:
-        compose_file = fin.read()
+        compose_file_template = fin.read()
 
     with open(THIS_DIR + "/ors-config.json", "r") as fin:
         config_file = json.load(fin)
@@ -43,7 +43,7 @@ def create_docker_environments():
         with open(path + "/conf/ors-config.json", "w") as fout:
             json.dump(config_file, fout)
 
-        compose_file = compose_file.replace(
+        compose_file = compose_file_template.replace(
             "{{REGION_NAME}}", region.name.replace("_", "-")
         )
 
