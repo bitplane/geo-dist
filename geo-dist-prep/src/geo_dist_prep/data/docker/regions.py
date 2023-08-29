@@ -113,5 +113,5 @@ def group_countries_by_region(country_codes):
     ret = {}
     for code in country_codes:
         region = get_region_for_country(code)
-        ret[region] = ret.get(region.name, []) + [code]
+        ret[region] = ret.get(region, []) + [code]
     return ret
