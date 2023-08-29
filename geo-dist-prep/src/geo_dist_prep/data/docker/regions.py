@@ -1,5 +1,9 @@
 from dataclasses import dataclass
 
+import psutil
+
+SYSTEM_RAM = psutil.virtual_memory().total / (1024**3)
+
 
 @dataclass(frozen=True)
 class Region:
@@ -7,6 +11,10 @@ class Region:
     file: str
     codes: frozenset[str]
     ram: int
+
+    @property
+    def too_large(self):
+        return self.ram + 1 > SYSTEM_RAM
 
 
 REGIONS = [

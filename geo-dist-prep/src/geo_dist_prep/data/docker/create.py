@@ -34,6 +34,10 @@ def create_docker_environments():
         config_file = json.load(fin)
 
     for region in REGIONS:
+        if region.too_large:
+            print("Skipping", region.name, "due to insufficient RAM")
+            continue
+
         path = ".cache/ors/" + region.name
         create_dirs(path)
 
