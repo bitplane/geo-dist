@@ -18,7 +18,7 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.orm import Session, sessionmaker
 
 URL = "http://localhost:8080/ors/v2/directions/driving-car"
-BATCH_SIZE = 10_000
+BATCH_SIZE = 1000
 
 
 def insert_data(session: Session, rows):
@@ -54,6 +54,24 @@ def insert_data(session: Session, rows):
     session.commit()
 
 
+def result(job_id, pair, distance, routable):
+    y1, x1 = normalize_coords(pair.lat1, pair.lon1)
+    y2, x2 = normalize_coords(pair.lat2, pair.lon2)
+
+    return [
+        job_id,
+        pair.start_id,
+        pair.end_id,
+        y1,
+        x1,
+        y2,
+        x2,
+        pair.direction,
+        distance,
+        routable,  # route found
+    ]
+
+
 def call_api(job_id, pairs):
     client = httpx.Client(http2=True)
 
@@ -78,7 +96,7 @@ def call_api(job_id, pairs):
                 continue
             if response["error"]["code"] == 2009:
                 # no route found
-                results.append(-1.0)
+                results.append(result(job_id, pair, -1.0, False))
                 continue
 
         try:
@@ -88,22 +106,7 @@ def call_api(job_id, pairs):
             print(json.dumps(response, indent=2))
             continue
 
-        y1, x1 = normalize_coords(pair.lat1, pair.lon1)
-        y2, x2 = normalize_coords(pair.lat2, pair.lon2)
-
-        results.append(
-            [
-                job_id,
-                pair.start_id,
-                pair.end_id,
-                y1,
-                x1,
-                y2,
-                x2,
-                pair.direction,
-                distance,
-            ]
-        )
+        results.append(result(job_id, pair, distance, True))
 
     return results
 
@@ -157,6 +160,7 @@ def enrich_country(country_code):
     job = GeoNameEnrichJob()
     job.pair_job_id = pair_job.id
     session.add(job)
+    session.commit()
     print("enrich: created enrich job", job.id)
 
     if len(pairs) < batch_size:
