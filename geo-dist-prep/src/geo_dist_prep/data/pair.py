@@ -62,6 +62,8 @@ def gather_pairs(job: GeoNamePairJob, geoname: GeoName):
 
 
 def insert_pairs(session, pairs):
+    if not pairs:
+        return
     session.execute(
         text(
             "INSERT OR IGNORE INTO geoname_pair "
