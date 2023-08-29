@@ -1,4 +1,5 @@
 from functools import wraps
+from itertools import islice
 from time import time
 
 
@@ -23,3 +24,12 @@ def print_time(f):
         return result
 
     return wrapper
+
+
+def chunks(data, chunk_size):
+    it = iter(data)
+    while True:
+        chunk = list(islice(it, chunk_size))
+        if not chunk:
+            return
+        yield chunk

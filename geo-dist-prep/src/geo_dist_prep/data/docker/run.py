@@ -12,12 +12,18 @@ def running_docker_container(container_name):
         subprocess.run(["./build/docker-up.sh", container_name])
 
         while True:
+            t = 1
             try:
-                httpx.get("http://localhost:8080/ors/v2/directions/driving-car").json()
+                print(
+                    httpx.get(
+                        "http://localhost:8080/ors/v2/directions/driving-car"
+                    ).json()
+                )
                 break
             except (httpx.HTTPError, json.decoder.JSONDecodeError):
-                print(f"Waiting for {container_name}...")
-                time.sleep(5)
+                print(f"Waiting {t}s for {container_name}...")
+                time.sleep(t)
+                t += 2
 
         print("Ready")
         yield
