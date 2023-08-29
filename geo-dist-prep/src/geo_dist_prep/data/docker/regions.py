@@ -14,7 +14,7 @@ REGIONS = [
         name="britain_and_ireland",
         file="https://download.geofabrik.de/europe/britain-and-ireland-latest.osm.pbf",
         codes=frozenset(code for code in ("gb|ie|im|gg|je").split("|")),
-        ram=2,  # 1.84gb peak RAM
+        ram=6,  # 1.84gb peak RAM
     ),
     Region(
         name="africa",
@@ -27,7 +27,7 @@ REGIONS = [
                 "rw|st|sn|sc|sl|so|za|ss|sd|tz|tg|tn|ug|eh|zm|zw"
             ).split("|")
         ),
-        ram=8,  # ?? peak RAM (5.01gb)
+        ram=12,  # ?? peak RAM (5.01gb)
     ),
     Region(
         name="antarctica",
@@ -46,7 +46,7 @@ REGIONS = [
                 "kr|lk|sy|tj|th|tl|tm|tr|ae|uz|vn|ye"
             ).split("|")
         ),
-        ram=20,  # 18.5gb peak RAM (??) (13gb file)
+        ram=24,  # 18.5gb peak RAM (??) (13gb file)
     ),
     Region(
         name="australia_oceania",
@@ -58,7 +58,7 @@ REGIONS = [
                 "to|tv|vu|wf|um"
             ).split("|")
         ),
-        ram=2,  # 1.22gb peak RAM
+        ram=4,  # 1.22gb peak RAM
     ),
     Region(
         name="europe",
@@ -71,13 +71,13 @@ REGIONS = [
                 "sm|rs|sk|si|es|se|ch|ua|gb|va"
             ).split("|")
         ),
-        ram=60,  # ???? too big! file is 28g
+        ram=72,  # ???? too big! file is 28g, crashes on 60gb
     ),
     Region(
         name="central_america",
         file="https://download.geofabrik.de/central-america-latest.osm.pbf",
         codes=frozenset(code for code in ("bz|cr|sv|gt|hn|ni|pa").split("|")),
-        ram=2,  # 1.12gb peak RAM (580mb)
+        ram=4,  # 1.12gb peak RAM (580mb)
     ),
     Region(
         name="north_america",
@@ -89,7 +89,7 @@ REGIONS = [
                 "cu|pr|kn|lc|pm|vc|tt|tc|us|vi"
             ).split("|")
         ),
-        ram=24,  # guess about 20gb to 22gb?
+        ram=28,  # guess about 20gb to 22gb?
     ),
     Region(
         name="south_america",
@@ -97,7 +97,7 @@ REGIONS = [
         codes=frozenset(
             code for code in "ar|bo|br|cl|co|ec|fk|gy|py|pe|sr|uy|ve".split("|")
         ),
-        ram=8,  # 5.65gb peak RAM (3.87gb)
+        ram=10,  # 5.65gb peak RAM (3.87gb)
     ),
 ]
 
