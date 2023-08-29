@@ -8,7 +8,12 @@ class Region:
     codes: set[str]
 
 
-_REGIONS = [
+REGIONS = [
+    Region(
+        name="britain_and_ireland",
+        file="https://download.geofabrik.de/europe/britain-and-ireland-latest.osm.pbf",
+        codes={code for code in ("gb|ie|im|gg|je").split("|")},
+    ),
     Region(
         name="africa",
         file="https://download.geofabrik.de/africa-latest.osm.pbf",
@@ -82,14 +87,6 @@ _REGIONS = [
         file="https://download.geofabrik.de/south-america-latest.osm.pbf",
         codes={code for code in ("ar|bo|br|cl|co|ec|fk|gy|py|pe|sr|uy|ve").split("|")},
     ),
-]
-
-REGIONS = [
-    Region(
-        name="britain_and_ireland",
-        file="https://download.geofabrik.de/europe/britain-and-ireland-latest.osm.pbf",
-        codes={code for code in ("gb|ie|im|gg|je").split("|")},
-    )
 ]
 
 
