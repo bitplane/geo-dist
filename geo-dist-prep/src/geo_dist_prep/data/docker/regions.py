@@ -88,7 +88,7 @@ REGIONS = [
     Region(
         name="britain_and_ireland",
         file="https://download.geofabrik.de/europe/britain-and-ireland-latest.osm.pbf",
-        codes={code for code in ("gb|ie|iom|gg|je").split("|")},
+        codes={code for code in ("gb|ie|im|gg|je").split("|")},
     )
 ]
 
