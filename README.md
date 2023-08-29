@@ -14,14 +14,17 @@ Run `make` and it will:
 4. Build a quadtree over the nodes in the database. A couple of mins.
 5. Extract pairs of nodes that are within routing distance. Needs to
    generate about 50m records, takes about 60 hours. Will run in a
-   per-country order creating a job for each one. Feel free to abort
-   and continue as needed.
-6. For each region, it'll download the appropriate openrouteservice
+   per-country order creating a job for each one. Heavily CPU-bound
+   so can be pushed to the cloud. Feel free to abort and continue as
+   needed.
+7. For each region, it'll download the appropriate openrouteservice
    data file, spin up ors, then check distances for jobs that ran
    in that region. This should take a couple of days.
-7. Normalize the data for training
-8. export it
-9. Train the model
+   Issue here is RAM. The Europe file needs ~60GB. Need to fix this
+   by breaking into smaller regions.
+9. Normalize the data for training
+10. export it
+11. Train the model
 
 ## openrouteservice notes
 
