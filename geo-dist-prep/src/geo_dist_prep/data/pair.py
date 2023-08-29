@@ -4,7 +4,7 @@ from functools import partial
 
 from geo_dist_prep.data import GEONAMES_DB, PAIR_SENTINEL
 from geo_dist_prep.schemas.base import Base
-from geo_dist_prep.schemas.geoname import GeoName
+from geo_dist_prep.schemas.geoname import GeoName, GeoNamePair
 from geo_dist_prep.schemas.helpers import direction, distance, nearby
 from geo_dist_prep.schemas.job import GeoNamePairJob
 from sqlalchemy import Integer, create_engine, func, text
@@ -162,7 +162,20 @@ def get_missing_countries():
     return sorted(list(missing_codes))
 
 
+def get_pair_count():
+    engine = create_engine(f"sqlite:///{GEONAMES_DB}")
+
+    Base.metadata.create_all(engine)
+    SessionMeker = sessionmaker(bind=engine)
+    session = SessionMeker()
+
+    return session.query(GeoNamePair).count()
+
+
 if __name__ == "__main__":
+    current_count = get_pair_count()
+    print("Current pair count:", current_count)
+
     missing_countries = get_missing_countries()
     print("Missing countries:", len(missing_countries))
 
