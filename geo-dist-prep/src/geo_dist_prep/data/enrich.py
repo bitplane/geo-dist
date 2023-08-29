@@ -245,6 +245,7 @@ def main():
     for region, countries in groups.items():
         if region.ram > ram_gb - 2:
             print("enrich:", region.name, "skipped: not enough RAM")
+            continue
 
         with running_docker_container(region.name):
             for country_code in countries:
