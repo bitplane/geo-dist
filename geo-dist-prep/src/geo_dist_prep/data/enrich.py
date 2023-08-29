@@ -44,6 +44,7 @@ def insert_data(session: Session, rows):
                         "x2",
                         "direction",
                         "distance",
+                        "routable",
                     ),
                     row,
                 )

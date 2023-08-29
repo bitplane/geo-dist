@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Float, ForeignKey, Integer, UniqueConstraint
+from sqlalchemy import Boolean, Column, Float, ForeignKey, Integer, UniqueConstraint
 
 from .base import Base
 
@@ -17,3 +17,4 @@ class TrainingData(Base):
     x2 = Column(Float, nullable=False)
     direction = Column(Float, nullable=False)
     distance = Column(Float, nullable=False)
+    routable = Column(Boolean, nullable=False)

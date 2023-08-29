@@ -10,12 +10,12 @@ class Region:
 
 REGIONS = [
     Region(
-        name="britain_and_ireland",
+        name="britain_and_ireland",  # 1.84gb peak RAM (??)
         file="https://download.geofabrik.de/europe/britain-and-ireland-latest.osm.pbf",
         codes={code for code in ("gb|ie|im|gg|je").split("|")},
     ),
     Region(
-        name="africa",
+        name="africa",  # ?? peak RAM (5.01gb)
         file="https://download.geofabrik.de/africa-latest.osm.pbf",
         codes={
             code
@@ -27,12 +27,12 @@ REGIONS = [
         },
     ),
     Region(
-        name="antarctica",
+        name="antarctica",  # 0.46gb peak RAM
         file="https://download.geofabrik.de/antarctica-latest.osm.pbf",
         codes={"tf", "gs", "aq"},
     ),
     Region(
-        name="asia",
+        name="asia",  # 18.5gb peak RAM
         file="https://download.geofabrik.de/asia-latest.osm.pbf",
         codes={
             code
@@ -44,7 +44,7 @@ REGIONS = [
         },
     ),
     Region(
-        name="australia_oceania",
+        name="australia_oceania",  # 1.22gb peak RAM
         file="https://download.geofabrik.de/australia-oceania-latest.osm.pbf",
         codes={
             code
@@ -55,7 +55,7 @@ REGIONS = [
         },
     ),
     Region(
-        name="europe",
+        name="europe",  # ???? too big!
         file="https://download.geofabrik.de/europe-latest.osm.pbf",
         codes={
             code
@@ -67,7 +67,7 @@ REGIONS = [
         },
     ),
     Region(
-        name="central_america",
+        name="central_america",  # 1.12gb peak RAM (580mb)
         file="https://download.geofabrik.de/central-america-latest.osm.pbf",
         codes={code for code in ("bz|cr|sv|gt|hn|ni|pa").split("|")},
     ),
@@ -83,7 +83,7 @@ REGIONS = [
         },
     ),
     Region(
-        name="south_america",
+        name="south_america",  #
         file="https://download.geofabrik.de/south-america-latest.osm.pbf",
         codes={code for code in ("ar|bo|br|cl|co|ec|fk|gy|py|pe|sr|uy|ve").split("|")},
     ),
