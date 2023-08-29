@@ -19,3 +19,10 @@ class GeoNamePairJob(Job):
     __mapper_args__ = {"polymorphic_identity": "geoname_pair_job"}
     id = Column(Integer, ForeignKey("job.id"), primary_key=True)
     country_code = Column(String(3))
+
+
+class GeoNameEnrichJob(Job):
+    __tablename__ = "geoname_enrich_job"
+    __mapper_args__ = {"polymorphic_identity": "geoname_enrich_job"}
+    id = Column(Integer, ForeignKey("job.id"), primary_key=True)
+    pair_job_id = Column(Integer, ForeignKey("geoname_pair_job.id"))

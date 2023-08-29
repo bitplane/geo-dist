@@ -91,3 +91,18 @@ REGIONS = [
         codes={code for code in ("gb|ie|iom|gg|je").split("|")},
     )
 ]
+
+
+def get_region_for_country(country_code):
+    for region in REGIONS:
+        if country_code in region.codes:
+            return region
+    raise ValueError(f"No container found for {country_code}")
+
+
+def group_countries_by_region(country_codes):
+    ret = {}
+    for code in country_codes:
+        region = get_region_for_country(code)
+        ret[region.name] = ret.get(region.name, []) + [code]
+    return ret

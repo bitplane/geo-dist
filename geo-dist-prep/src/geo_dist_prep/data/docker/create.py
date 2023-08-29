@@ -50,7 +50,7 @@ def create_docker_environments():
         with open(path + "/docker-compose.yml", "w") as fout:
             fout.write(compose_file)
 
-        os.system("wget " + region.file + " -P " + path + "/data/")
+        os.system("wget --continue " + region.file + " -P " + path + "/data/")
 
 
 if __name__ == "__main__":

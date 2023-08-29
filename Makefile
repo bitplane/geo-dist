@@ -8,7 +8,7 @@ SRC_DIR := geo-dist-prep/src/geo_dist_prep/
 
 GEONAMES_FILE := $(shell python3 $(SRC_DIR)data/__init__.py GEONAMES_FILE)
 
-all: .cache/docker.create.done
+all: dev .cache/enrich.done
 
 install: .venv/.installed  ## installs the venv and the project packages
 
@@ -65,14 +65,8 @@ $(GEONAMES_FILE).done: build/download-geonames.sh
 	build/data.sh docker.create
 
 # 6. Add location data using openrouteservice
-# $(DIST_DATA): $(NODE_PAIRS) $(SRC_DIR)/data/enrich.py
-# 	build/data.sh enrich
-
-# 7. Normalize the data for training
-# $(NORMALIZED_DATA): $(DIST_DATA) $(SRC_DIR)/data/normalize.py
-# 	build/data.sh normalize
-
-# 8. Train the model
+.cache/enrich.done: .cache/pair.done .cache/docker.create.done $(SRC_DIR)/data/enrich.py
+	build/data.sh enrich
 
 
 help: ## Show this help
