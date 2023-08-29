@@ -2,8 +2,9 @@ import sys
 
 GEONAMES_FILE = ".cache/geonames.tsv.gz"
 GEONAMES_DB = ".cache/geonames.db"
-SCORE_SENTINEL = ".cache/score.sentinel"
-PAIR_SENTINEL = ".cache/pair.sentinel"
+GEONAMES_DB_LOADED = ".cache/database.sentinel"
+SCORED = ".cache/score.sentinel"
+PAIRED = ".cache/pair.sentinel"
 
 DIST_DATA = ".cache/dist.tsv"
 NORMALIZED_DATA = ".cache/normalized.tsv"

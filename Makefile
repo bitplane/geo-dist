@@ -7,15 +7,15 @@
 SRC_DIR := geo-dist-prep/src/geo_dist_prep/
 
 GEONAMES_FILE := $(shell python3 $(SRC_DIR)data/__init__.py GEONAMES_FILE)
-GEONAMES_DB := $(shell python3 $(SRC_DIR)data/__init__.py GEONAMES_DB)
-SCORE_SENTINEL := $(shell python3 $(SRC_DIR)data/__init__.py SCORE_SENTINEL)
-PAIR_SENTINEL := $(shell python3 $(SRC_DIR)data/__init__.py PAIR_SENTINEL)
+GEONAMES_DB_LOADED := $(shell python3 $(SRC_DIR)data/__init__.py GEONAMES_DB_LOADED)
+SCORED := $(shell python3 $(SRC_DIR)data/__init__.py SCORED)
+PAIRED := $(shell python3 $(SRC_DIR)data/__init__.py PAIRED)
 
 DIST_DATA := $(shell python3 $(SRC_DIR)data/__init__.py DIST_DATA)
 NORMALIZED_DATA := $(shell python3 $(SRC_DIR)data/__init__.py NORMALIZED_DATA)
 
 
-all: dev $(PAIR_SENTINEL)
+all: dev $(PAIRED)
 
 install: .venv/.installed  ## installs the venv and the project packages
 
@@ -56,15 +56,15 @@ $(GEONAMES_FILE).done: build/download-geonames.sh
 	build/download-geonames.sh $(GEONAMES_FILE).done
 
 # 2. Import into a sqlite database
-$(GEONAMES_DB): $(GEONAMES_FILE).done build/data.sh $(SRC_DIR)/data/load.py $(SRC_DIR)/schemas/geoname.py
+$(GEONAMES_DB_LOADED): $(GEONAMES_FILE).done build/data.sh $(SRC_DIR)/data/load.py $(SRC_DIR)/schemas/geoname.py
 	build/data.sh load
 
 # 3. Score the rows, building a tree for searching
-$(SCORE_SENTINEL): $(GEONAMES_DB) $(SRC_DIR)/data/score.py
+$(SCORED): $(GEONAMES_DB_LOADED) $(SRC_DIR)/data/score.py
 	build/data.sh score
 
 # 4. Extract nodes from the tree into pairs
-$(PAIR_SENTINEL): $(SCORE_SENTINEL) $(SRC_DIR)/data/pair.py
+$(PAIRED): $(SCORED) $(SRC_DIR)/data/pair.py
 	build/data.sh pair
 
 # # 5. Add location data using openrouteservice

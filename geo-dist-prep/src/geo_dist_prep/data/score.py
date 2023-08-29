@@ -3,7 +3,7 @@ from datetime import datetime
 from sqlalchemy import create_engine, delete, text, update
 from sqlalchemy.orm import sessionmaker
 
-from ..data import GEONAMES_DB, SCORE_SENTINEL
+from ..data import GEONAMES_DB, SCORED
 from ..schemas.geoname import GeoName
 from ..schemas.helpers import grid_coord
 
@@ -52,6 +52,6 @@ def score_nodes():
 if __name__ == "__main__":
     score_nodes()
 
-    with open(SCORE_SENTINEL, "wt") as outfile:
+    with open(SCORED, "wt") as outfile:
         # save datetime to file
         outfile.write(datetime.now().isoformat())
