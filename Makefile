@@ -6,17 +6,9 @@
 
 SRC_DIR := geo-dist-prep/src/geo_dist_prep/
 
-FILTERED_FILE := $(shell python $(SRC_DIR)data/__init__.py FILTERED_FILE)
-TREE_FILE := $(shell python $(SRC_DIR)data/__init__.py TREE_FILE)
-NODE_PAIRS := $(shell python $(SRC_DIR)data/__init__.py NODE_PAIRS)
-DIST_DATA := $(shell python $(SRC_DIR)data/__init__.py DIST_DATA)
-NORMALIZED_DATA := $(shell python $(SRC_DIR)data/__init__.py NORMALIZED_DATA)
+GEONAMES_FILE := $(shell python3 $(SRC_DIR)data/__init__.py GEONAMES_FILE)
 
-GEOTREE_SRC := $(shell find $(SRC_DIR)geotree -type f -name '*.py')
-
-# SOURCE_FILES := $(shell find . -type f -name '*.py')
-
-all: $(NORMALIZED_DATA)
+all: dev .cache/enrich.done
 
 install: .venv/.installed  ## installs the venv and the project packages
 
@@ -41,7 +33,7 @@ update-pre-commit: build/update-pre-commit.sh  ## autoupdate pre-commit
 .venv/.installed: */pyproject.toml .venv/bin/activate build/install.sh
 	build/install.sh
 
-.venv/bin/activate:
+.venv/bin/activate: build/venv.sh
 	build/venv.sh
 
 .git/hooks/pre-commit: build/install-pre-commit.sh
@@ -53,34 +45,28 @@ update-pre-commit: build/update-pre-commit.sh  ## autoupdate pre-commit
 
 
 # 1. download the geonames file
-.cache/geonames.tsv.gz.done: build/download-geonames.sh
-	build/download-geonames.sh
+$(GEONAMES_FILE).done: build/download-geonames.sh
+	build/download-geonames.sh $(GEONAMES_FILE).done
 
-# 2. filter out names we don't want
-$(FILTERED_FILE): .cache/geonames.tsv.gz.done build/data.sh $(SRC_DIR)/data/filter.py
-	build/data.sh filter
+# 2. Import into a sqlite database
+.cache/load.done: $(GEONAMES_FILE).done build/data.sh $(SRC_DIR)/data/load.py $(SRC_DIR)/schemas/geoname.py
+	build/data.sh load
 
-# 3. Build it into a quad-tree
-$(TREE_FILE): $(FILTERED_FILE) $(SRC_DIR)/data/build.py $(GEOTREE_SRC)
-	build/data.sh build
+# 3. Score the rows, building a tree for searching
+.cache/score.done: .cache/load.done $(SRC_DIR)/data/score.py
+	build/data.sh score
 
-# 4. Extract nearby nodes from the tree into pairs
-$(NODE_PAIRS): $(TREE_FILE) $(SRC_DIR)/data/extract.py $(GEOTREE_SRC)
-	build/data.sh extract
+# 4. Extract nodes from the tree into pairs
+.cache/pair.done: .cache/score.done $(SRC_DIR)/data/pair.py
+	build/data.sh pair
 
-# 5. Add location data using openrouteservice
-$(DIST_DATA): $(NODE_PAIRS) $(SRC_DIR)/data/enrich.py
+# 5. Create docker compose environments
+.cache/docker.create.done: $(SRC_DIR)/data/docker/regions.py $(SRC_DIR)/data/docker/create.py $(SRC_DIR)/data/docker/ors-config.json $(SRC_DIR)/data/docker/docker-compose.yml
+	build/data.sh docker.create
+
+# 6. Add location data using openrouteservice
+.cache/enrich.done: .cache/pair.done .cache/docker.create.done $(SRC_DIR)/data/enrich.py
 	build/data.sh enrich
-
-# 6. Normalize the data for training
-$(NORMALIZED_DATA): $(DIST_DATA) $(SRC_DIR)/data/normalize.py
-	build/data.sh normalize
-
-# 7. Train the model
-
-
-# 8. Start the web service!
-
 
 
 help: ## Show this help

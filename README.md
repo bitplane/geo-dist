@@ -3,14 +3,37 @@
 
 Find the distance between two places.
 
-1. get geonames tsv dump
-2. extract places where people actually live
-3. stick them into a quadtree
-4. find the closest nodes
-5. try to route between nearby places
-   openrouteservice with this for now:
+## Steps
+
+Run `make` and it will:
+
+1. Install python deps. Gigs of Python ML deps in here
+2. download geonames tsv dump. This is a 1.7gb download.
+3. Extract places where people actually live. 25 million rows to 2m.
+   Takes 10 minutes or so.
+4. Build a quadtree over the nodes in the database. A couple of mins.
+5. Extract pairs of nodes that are within routing distance. Needs to
+   generate about 50m records, takes about 60 hours. Will run in a
+   per-country order creating a job for each one. Feel free to abort
+   and continue as needed.
+6. For each region, it'll download the appropriate openrouteservice
+   data file, spin up ors, then check distances for jobs that ran
+   in that region. This should take a couple of days.
+7. Normalize the data for training
+8. export it
+9. Train the model
+
+## openrouteservice notes
+
+openrouteservice with this for now:
    <https://download.geofabrik.de/europe/great-britain-latest.osm.pbf>
-6. if the distance is close to the tree node size, collapse segment
+
+## Running
+
+Look at the Makefile. `make` will attempt to do everything but will
+take days to complete (at best).
+
+You can interrupt the process and it'll continue
 
 ## notes
 

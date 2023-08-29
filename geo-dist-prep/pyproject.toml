@@ -10,7 +10,6 @@ readme = "README.md"
 requires-python = ">=3.9"
 
 dependencies = [
-    "pygeohash",
     "jupyter",
     "tensorflow",
     "tensorrt",
@@ -18,7 +17,8 @@ dependencies = [
     "httpx[http2]",
     "matplotlib",
     "pandas",
-    "ipython"
+    "ipython",
+    "sqlalchemy"
 ]
 
 [project.optional-dependencies]
