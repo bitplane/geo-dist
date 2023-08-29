@@ -29,9 +29,9 @@ def insert_data(session: Session, rows):
 
     session.execute(
         text(
-            "INSERT OR IGNORE INTO training_data "
-            "(job_id, start_id, end_id, y1, x1, y2, x2, direction, distance) "
-            "VALUES (:job_id, :start_id, :end_id, :y1, :x1, :y2, :x2, :direction, :distance)"
+            "INSERT INTO training_data "
+            "(job_id, start_id, end_id, y1, x1, y2, x2, direction, distance, routable) "
+            "VALUES (:job_id, :start_id, :end_id, :y1, :x1, :y2, :x2, :direction, :distance, :routable)"
         ),
         [
             dict(
@@ -87,13 +87,14 @@ def call_api(job_id, pairs):
         }
         response = None
         retry = 0
-        while not response and retry < 10:
+        while not response and retry < 60:
             try:
                 response = client.get(URL, params=params).json()
             except httpx.ReadTimeout:
                 print(f"timeout, retrying in {retry} seconds")
                 time.sleep(retry)
                 retry += 1
+                client = httpx.Client(http2=True)
                 continue
 
         if retry == 10:
@@ -109,7 +110,7 @@ def call_api(job_id, pairs):
             if response["error"]["code"] == 2010:
                 # one of the endpoints isn't in this data file
                 continue
-            if response["error"]["code"] == 2009:
+            if response["error"]["code"] in (2009, 2099):
                 # no route found
                 results.append(result(job_id, pair, -1.0, False))
                 continue
@@ -254,4 +255,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-    raise Exception("stop")
