@@ -1,5 +1,6 @@
 import json
 import os
+import time
 from concurrent.futures import ProcessPoolExecutor
 from datetime import datetime
 from functools import partial
@@ -18,7 +19,7 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.orm import Session, sessionmaker
 
 URL = "http://localhost:8080/ors/v2/directions/driving-car"
-BATCH_SIZE = 100_000
+BATCH_SIZE = 1_000
 
 
 def insert_data(session: Session, rows):
@@ -84,8 +85,16 @@ def call_api(job_id, pairs):
             "end": f"{pair.lon2},{pair.lat2}",
         }
         response = None
+        retry = 0
+        while not response and retry < 10:
+            try:
+                response = client.get(URL, params=params).json()
+            except httpx.ReadTimeout:
+                print(f"timeout, retrying in {retry} seconds")
+                time.sleep(retry)
+                retry += 1
+                continue
 
-        response = client.get(URL, params=params).json()
         distance = -1.0
 
         if "error" in response:
