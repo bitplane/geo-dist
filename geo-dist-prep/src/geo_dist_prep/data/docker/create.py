@@ -13,7 +13,16 @@ def set_source_files(config: dict, sources: list):
 
 
 def create_dirs(path):
-    for subdir in ("conf", "data", "elevation_cache", "graphs", "logs"):
+    # this is a hack. should run as correct user instead by setting GUI and UID
+    for subdir in (
+        "graphs/car",
+        "logs/ors",
+        "logs/tomcat",
+        "data",
+        "elevation_cache",
+        "data/graphs",
+        "conf",
+    ):
         os.makedirs(os.path.join(path, subdir), exist_ok=True)
 
 
@@ -33,6 +42,10 @@ def create_docker_environments():
 
         with open(path + "/conf/ors-config.json", "w") as fout:
             json.dump(config_file, fout)
+
+        compose_file = compose_file.replace(
+            "{{REGION_NAME}}", region.name.replace("_", "-")
+        )
 
         with open(path + "/docker-compose.yml", "w") as fout:
             fout.write(compose_file)
