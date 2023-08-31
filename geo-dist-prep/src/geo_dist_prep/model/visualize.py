@@ -9,13 +9,16 @@ class PlotLosses(Callback):
         self.val_losses = []
 
     def on_epoch_end(self, epoch, logs={}):
-        self.losses.append(logs.get("loss"))
-        self.val_losses.append(logs.get("val_loss"))
+        loss_mse = logs.get("loss")
+        val_loss_mse = logs.get("val_loss")
+        self.losses.append(loss_mse)
+        self.val_losses.append(val_loss_mse)
 
         clear_output(wait=True)
-        plt.plot(self.losses, label="loss")
-        plt.plot(self.val_losses, label="val_loss")
+        plt.plot(self.losses[2:], label="loss")
+        plt.plot(self.val_losses[2:], label="val_loss")
         plt.legend()
+        plt.yscale("log")
         plt.show()
 
 

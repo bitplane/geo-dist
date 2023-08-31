@@ -6,7 +6,6 @@ from datetime import datetime
 from functools import partial
 
 import httpx
-import psutil
 from geo_dist_prep.data import GEONAMES_DB
 from geo_dist_prep.data.docker.regions import group_countries_by_region
 from geo_dist_prep.data.docker.run import running_docker_container
@@ -242,10 +241,8 @@ def main():
 
     groups = group_countries_by_region(pending_countries)
 
-    ram_gb = psutil.virtual_memory().total / (1024**3)
-
     for region, countries in groups.items():
-        if region.ram > ram_gb - 2:
+        if region.too_large:
             print("enrich:", region.name, "skipped: not enough RAM")
             continue
 
