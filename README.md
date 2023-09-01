@@ -17,14 +17,22 @@ Run `make` and it will:
    per-country order creating a job for each one. Heavily CPU-bound
    so can be pushed to the cloud. Feel free to abort and continue as
    needed.
-7. For each region, it'll download the appropriate openrouteservice
+6. For each region, it'll download the appropriate openrouteservice
    data file, spin up ors, then check distances for jobs that ran
    in that region. This should take a couple of days.
    Issue here is RAM. The Europe file needs ~60GB. Need to fix this
    by breaking into smaller regions.
-9. Normalize the data for training
-10. export it
-11. Train the model
+7. Once this is complete, we need to do a second pass of node creation
+   focused on hot spots. Then run step 8 again!
+8. tbc...
+
+Notes:
+
+* If you're on AWS you're gonna run out of space on your rootfs. Create a
+  volume of about 200gb, use cfdisk to make tmpfs for /tmp as well as the
+  volume for this repo.
+* current experiments are under ./notebooks - they'll be moved into the
+  project main directory once thrashed out.
 
 ## openrouteservice notes
 
