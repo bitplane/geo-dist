@@ -19,12 +19,6 @@ class Region:
 
 REGIONS = [
     Region(
-        name="britain_and_ireland",
-        file="https://download.geofabrik.de/europe/britain-and-ireland-latest.osm.pbf",
-        codes=frozenset(code for code in ("gb|ie|im|gg|je").split("|")),
-        ram=6,  # 1.84gb peak RAM
-    ),
-    Region(
         name="africa",
         file="https://download.geofabrik.de/africa-latest.osm.pbf",
         codes=frozenset(
@@ -79,7 +73,7 @@ REGIONS = [
                 "sm|rs|sk|si|es|se|ch|ua|gb|va"
             ).split("|")
         ),
-        ram=72,  # ???? too big! file is 28g, crashes on 60gb
+        ram=80,  # needs 72gb to extract, will use tons during enrichment.
     ),
     Region(
         name="central_america",

@@ -247,6 +247,7 @@ def main():
             continue
 
         with running_docker_container(region.name):
+            print("enrich:", region.name, countries)
             for country_code in countries:
                 enrich_country(country_code)
 

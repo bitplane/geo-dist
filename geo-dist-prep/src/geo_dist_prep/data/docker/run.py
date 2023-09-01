@@ -19,6 +19,7 @@ def running_docker_container(container_name):
                 ).json()
                 if "error" in response and response["error"]["code"] == 2001:
                     # our invald response was served, so the server is up
+                    print(response)
                     break
                 else:
                     # Unexpected response, so wait a bit and try again.
