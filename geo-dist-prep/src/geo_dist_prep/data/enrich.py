@@ -19,7 +19,7 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.orm import Session, sessionmaker
 
 URL = "http://localhost:8080/ors/v2/directions/driving-car"
-BATCH_SIZE = 1_000
+BATCH_SIZE = 10_000
 
 
 def insert_data(session: Session, rows):
@@ -56,9 +56,9 @@ def insert_data(session: Session, rows):
     session.commit()
 
 
-def result(job_id, pair, distance, routable):
-    y1, x1 = normalize_coords(pair.lat1, pair.lon1)
-    y2, x2 = normalize_coords(pair.lat2, pair.lon2)
+def result(job_id, pair, lat1, lon1, lat2, lon2, distance, routable):
+    y1, x1 = normalize_coords(lat1, lon1)
+    y2, x2 = normalize_coords(lat2, lon2)
 
     return [
         job_id,
@@ -81,6 +81,10 @@ def call_api(job_id, pairs):
     results = []
 
     for i, pair in enumerate(pairs):
+        lat1 = pair.start.lat1
+        lat2 = pair.end.lat2
+        lon1 = pair.start.lon1
+        lon2 = pair.end.lon2
         params = {
             "start": f"{pair.lon1},{pair.lat1}",
             "end": f"{pair.lon2},{pair.lat2}",
@@ -117,12 +121,17 @@ def call_api(job_id, pairs):
 
         try:
             distance = response["features"][0]["properties"]["summary"]["distance"]
+            lat1 = response["features"][0]["geometry"]["coordinates"][0][1]
+            lon1 = response["features"][0]["geometry"]["coordinates"][0][0]
+            lat2 = response["features"][0]["geometry"]["coordinates"][-1][1]
+            lon2 = response["features"][0]["geometry"]["coordinates"][-1][0]
+
             distance = float(distance) / 1000.0
         except Exception:
             print(json.dumps(response, indent=2))
             continue
 
-        results.append(result(job_id, pair, distance, True))
+        results.append(result(job_id, pair, lat1, lon1, lat2, lon2, distance, True))
 
     return results
 
