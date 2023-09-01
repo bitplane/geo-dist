@@ -81,10 +81,10 @@ def call_api(job_id, pairs):
     results = []
 
     for i, pair in enumerate(pairs):
-        lat1 = pair.start.lat1
-        lat2 = pair.end.lat2
-        lon1 = pair.start.lon1
-        lon2 = pair.end.lon2
+        lat1 = pair.lat1
+        lat2 = pair.lat2
+        lon1 = pair.lon1
+        lon2 = pair.lon2
         params = {
             "start": f"{pair.lon1},{pair.lat1}",
             "end": f"{pair.lon2},{pair.lat2}",
@@ -116,7 +116,9 @@ def call_api(job_id, pairs):
                 continue
             if response["error"]["code"] in (2009, 2099):
                 # no route found
-                results.append(result(job_id, pair, -1.0, False))
+                results.append(
+                    result(job_id, pair, lat1, lon1, lat2, lon2, -1.0, False)
+                )
                 continue
 
         try:
