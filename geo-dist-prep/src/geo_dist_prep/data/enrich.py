@@ -200,7 +200,7 @@ def enrich_country(country_code):
 
     call_api_job = partial(call_api, job.id)
 
-    with ProcessPoolExecutor() as executor:
+    with ProcessPoolExecutor(max_workers=12) as executor:
         for results in executor.map(call_api_job, chunks(pairs, batch_size)):
             insert_data(session, results)
 
