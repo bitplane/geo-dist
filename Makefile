@@ -12,7 +12,7 @@ all: dev .cache/enrich.done
 
 undo:
 	cp .cache/geonames.bak.gz .cache/geonames.db.bak.gz
-	mv .cache/geonames.db .cache/geonames.db.old
+	mv .cache/geonames.db .cache/geonames.db.old || echo "no databse to back up"
 	gunzip .cache/geonames.db.bak.gz
 	mv .cache/geonames.db.bak .cache/geonames.db
 
