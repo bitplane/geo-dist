@@ -19,7 +19,7 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.orm import Session, sessionmaker
 
 URL = "http://localhost:8080/ors/v2/directions/driving-car"
-BATCH_SIZE = 1_000
+BATCH_SIZE = 10_000
 
 
 def insert_data(session: Session, rows):
@@ -56,9 +56,9 @@ def insert_data(session: Session, rows):
     session.commit()
 
 
-def result(job_id, pair, distance, routable):
-    y1, x1 = normalize_coords(pair.lat1, pair.lon1)
-    y2, x2 = normalize_coords(pair.lat2, pair.lon2)
+def result(job_id, pair, lat1, lon1, lat2, lon2, distance, routable):
+    y1, x1 = normalize_coords(lat1, lon1)
+    y2, x2 = normalize_coords(lat2, lon2)
 
     return [
         job_id,
@@ -81,6 +81,10 @@ def call_api(job_id, pairs):
     results = []
 
     for i, pair in enumerate(pairs):
+        lat1 = pair.lat1
+        lat2 = pair.lat2
+        lon1 = pair.lon1
+        lon2 = pair.lon2
         params = {
             "start": f"{pair.lon1},{pair.lat1}",
             "end": f"{pair.lon2},{pair.lat2}",
@@ -112,17 +116,24 @@ def call_api(job_id, pairs):
                 continue
             if response["error"]["code"] in (2009, 2099):
                 # no route found
-                results.append(result(job_id, pair, -1.0, False))
+                results.append(
+                    result(job_id, pair, lat1, lon1, lat2, lon2, -1.0, False)
+                )
                 continue
 
         try:
             distance = response["features"][0]["properties"]["summary"]["distance"]
+            lat1 = response["features"][0]["geometry"]["coordinates"][0][1]
+            lon1 = response["features"][0]["geometry"]["coordinates"][0][0]
+            lat2 = response["features"][0]["geometry"]["coordinates"][-1][1]
+            lon2 = response["features"][0]["geometry"]["coordinates"][-1][0]
+
             distance = float(distance) / 1000.0
         except Exception:
             print(json.dumps(response, indent=2))
             continue
 
-        results.append(result(job_id, pair, distance, True))
+        results.append(result(job_id, pair, lat1, lon1, lat2, lon2, distance, True))
 
     return results
 
@@ -189,7 +200,7 @@ def enrich_country(country_code):
 
     call_api_job = partial(call_api, job.id)
 
-    with ProcessPoolExecutor() as executor:
+    with ProcessPoolExecutor(max_workers=12) as executor:
         for results in executor.map(call_api_job, chunks(pairs, batch_size)):
             insert_data(session, results)
 
@@ -247,6 +258,7 @@ def main():
             continue
 
         with running_docker_container(region.name):
+            print("enrich:", region.name, countries)
             for country_code in countries:
                 enrich_country(country_code)
 

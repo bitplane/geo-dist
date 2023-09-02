@@ -10,6 +10,12 @@ GEONAMES_FILE := $(shell python3 $(SRC_DIR)data/__init__.py GEONAMES_FILE)
 
 all: dev .cache/enrich.done
 
+undo:
+	cp .cache/geonames.bak.gz .cache/geonames.db.bak.gz
+	mv .cache/geonames.db .cache/geonames.db.old || echo "no databse to back up"
+	gunzip .cache/geonames.db.bak.gz
+	mv .cache/geonames.db.bak .cache/geonames.db
+
 install: .venv/.installed  ## installs the venv and the project packages
 
 dev: .venv/.installed pre-commit  ## prepare local repo and venv for dev
