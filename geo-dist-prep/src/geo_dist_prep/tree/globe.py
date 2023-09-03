@@ -7,15 +7,14 @@ TILE_HEIGHT = 180.0 / 3.0
 
 class Globe(Node):
     def __init__(self):
-        self.neighbours = [None] * len(Pos)
-        self.neighbours[Pos.CENTER] = None
-        self.neighbours[Pos.LEFT] = self
-        self.neighbours[Pos.RIGHT] = self
-        self.neighbours[Pos.VERTICAL] = self
-        self.children = []
+        self.relations = {}
+        self.relations[Pos.PARENT] = None
+        self.relations[Pos.LEFT_EDGE] = self
+        self.relations[Pos.RIGHT_EDGE] = self
+        self.relations[Pos.BASE] = self
         self.build()
 
-    def get_address(self, lat: float, lon: float, max_depth: int = 15) -> list[int]:
+    def get_address(self, lat: float, lon: float, max_depth: int = 13) -> list[int]:
         """
         Get the address of the node that contains the given coordinates.
 
@@ -35,7 +34,7 @@ class Globe(Node):
         if max_depth == 1:
             return
 
-        node = self.children[node_id]
+        node = self.relations[node_id]
 
         width = node.width
         height = node.height
@@ -54,17 +53,17 @@ class Globe(Node):
             left = lon < x
 
             if tip:
-                yield Pos.VERTICAL
+                yield Pos.TIP
             elif center:
                 yield Pos.CENTER
                 y += height * direction
                 direction *= -1
             elif left:
-                yield Pos.LEFT
+                yield Pos.LEFT_POINT
                 x -= width / 4
                 y += height / 2 * direction
             else:
-                yield Pos.RIGHT
+                yield Pos.RIGHT_POINT
                 x += width / 4
                 y += height / 2 * direction
 
@@ -126,23 +125,25 @@ class Globe(Node):
         for i in range(5):
             left = (i - 1) % 5
             right = (i + 1) % 5
-            north_cap[i].neighbours[Pos.LEFT] = north_cap[left]
-            north_cap[i].neighbours[Pos.RIGHT] = north_cap[right]
-            north_cap[i].neighbours[Pos.VERTICAL] = north_mid[i]
+            north_cap[i].relations[Pos.LEFT_EDGE] = north_cap[left]
+            north_cap[i].relations[Pos.RIGHT_EDGE] = north_cap[right]
+            north_cap[i].relations[Pos.BASE] = north_mid[i]
 
-            south_cap[i].neighbours[Pos.LEFT] = south_cap[left]
-            south_cap[i].neighbours[Pos.RIGHT] = south_cap[right]
-            south_cap[i].neighbours[Pos.VERTICAL] = south_mid[i]
+            south_cap[i].relations[Pos.LEFT_EDGE] = south_cap[left]
+            south_cap[i].relations[Pos.RIGHT_EDGE] = south_cap[right]
+            south_cap[i].relations[Pos.BASE] = south_mid[i]
 
-            north_mid[i].neighbours[Pos.LEFT] = south_mid[left]
-            north_mid[i].neighbours[Pos.RIGHT] = south_mid[right]
-            north_mid[i].neighbours[Pos.VERTICAL] = north_cap[i]
+            north_mid[i].relations[Pos.LEFT_EDGE] = south_mid[left]
+            north_mid[i].relations[Pos.RIGHT_EDGE] = south_mid[right]
+            north_mid[i].relations[Pos.BASE] = north_cap[i]
 
-            south_mid[left].neighbours[Pos.LEFT] = north_mid[i]
-            south_mid[right].neighbours[Pos.RIGHT] = north_mid[i]
-            south_mid[i].neighbours[Pos.VERTICAL] = south_cap[i]
+            south_mid[left].relations[Pos.LEFT_EDGE] = north_mid[i]
+            south_mid[right].relations[Pos.RIGHT_EDGE] = north_mid[i]
+            south_mid[i].relations[Pos.BASE] = south_cap[i]
 
-        self.children = north_cap + north_mid + south_mid + south_cap
+        children = north_cap + north_mid + south_mid + south_cap
+        for i, child in enumerate(children):
+            self.relations[i] = child
 
     def __repr__(self):
         return "Globe()"

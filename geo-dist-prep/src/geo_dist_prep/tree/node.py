@@ -8,12 +8,15 @@ class Node:
         self,
         coords: tuple[float],
         flipped: bool,
+        pos: Pos,
         depth: int = 0,
         parent: "Node" = None,
+        data=None,
     ):
         # position of the tip of the triangle
         self.lat = coords[0]
         self.lon = coords[1]
+        self.data = data
 
         # direction into the triangle from the tip
         self.flipped: bool = flipped
@@ -22,30 +25,36 @@ class Node:
         self.depth: int = depth
 
         # children and neighbours indexed by Pos
-        self.children: list[Node] = [None, None, None, None]
-        self.neighbours: list[Node] = [None, None, None, None]
-        self.neighbours[Pos.CENTER] = parent
+        self.relations: dict[Pos, Node] = {}
+        self.relations[Pos.PARENT] = parent
 
-    def add_child(self, pos: Pos) -> "Node":
+    def add_child(self, pos: Pos, data=None) -> "Node":
         """
         Get or create a child of this node.
         """
-        if not self.children[pos]:
+        if pos not in self.relations:
             flipped = self.flipped if pos != Pos.CENTER else not self.flipped
             half_y = self.lat + self.height / 2.0 * self.direction
             base_y = self.lat + self.height * self.direction
             quarter_x = self.width / 4.0
             coords = {
                 Pos.CENTER: (base_y, self.lon),
-                Pos.VERTICAL: (self.lat, self.lon),
-                Pos.LEFT: (half_y, self.lon - quarter_x),
-                Pos.RIGHT: (half_y, self.lon + quarter_x),
+                Pos.TIP: (self.lat, self.lon),
+                Pos.LEFT_POINT: (half_y, self.lon - quarter_x),
+                Pos.RIGHT_POINT: (half_y, self.lon + quarter_x),
             }[pos]
             depth = self.depth + 1
-            self.children[pos] = Node(coords, flipped, depth, self)
-            self.children[pos]._update_neighbours(pos)
+            self.relations[pos] = Node(
+                coords=coords,
+                flipped=flipped,
+                pos=pos,
+                depth=depth,
+                parent=self,
+                data=data,
+            )
+            self.relations[pos]._update_neighbours(pos)
 
-        return self.children[pos]
+        return self.relations[pos]
 
     def _update_neighbours(self, my_pos: Pos):
         """
@@ -54,40 +63,40 @@ class Node:
         This is called when a node is created, and because they can be created
         in any order, it has to do a local search to figure out what exists.
         """
-        parent = self.neighbours[Pos.CENTER]
+        parent = self.parent
 
         if not parent:
             return
 
-        if my_pos == Pos.CENTER:
-            left = parent.children[Pos.LEFT]
-            right = parent.children[Pos.RIGHT]
-            vertical = parent.children[Pos.VERTICAL]
-        elif my_pos == Pos.VERTICAL:
-            left = parent.find([-Pos.LEFT, Pos.RIGHT])
-            right = parent.find([-Pos.RIGHT, Pos.LEFT])
-            vertical = parent.children[Pos.CENTER]
-        elif my_pos == Pos.LEFT:
-            left = parent.find([-Pos.LEFT, Pos.CENTER])
-            right = parent.children[Pos.CENTER]
-            vertical = parent.find([-Pos.VERTICAL, Pos.LEFT])
-        elif my_pos == Pos.RIGHT:
-            left = parent.children[Pos.CENTER]
-            right = parent.find([-Pos.RIGHT, Pos.CENTER])
-            vertical = parent.find([-Pos.VERTICAL, Pos.RIGHT])
+        if my_pos == Pos.LEFT_POINT:
+            left = parent.find([Pos.LEFT_POINT, Pos.TIP])
+            right = parent.relations[Pos.CENTER]
+            vertical = parent.find([Pos.BASE, Pos.LEFT_POINT])
+        elif my_pos == Pos.RIGHT_POINT:
+            left = parent.relations[Pos.CENTER]
+            right = parent.find([Pos.RIGHT_EDGE, Pos.TIP])
+            vertical = parent.find([Pos.BASE, Pos.RIGHT_POINT])
+        elif my_pos == Pos.TIP:
+            left = parent.find([Pos.LEFT_EDGE, Pos.RIGHT_POINT])
+            right = parent.find([Pos.RIGHT_EDGE, Pos.LEFT_POINT])
+            vertical = parent.relations[Pos.CENTER]
+        elif my_pos == Pos.CENTER:
+            left = parent.relations[Pos.LEFT_POINT]
+            right = parent.relations[Pos.RIGHT_POINT]
+            vertical = parent.relations[Pos.TIP]
         else:
             raise ValueError(f"Invalid child position: {my_pos}")
 
-        self.neighbours[Pos.LEFT] = left
-        self.neighbours[Pos.RIGHT] = right
-        self.neighbours[Pos.VERTICAL] = vertical
+        self.relations[Pos.LEFT_EDGE] = left
+        self.relations[Pos.RIGHT_EDGE] = right
+        self.relations[Pos.BASE] = vertical
         for neighbour, position in (
-            (left, Pos.RIGHT),
-            (right, Pos.LEFT),
-            (vertical, Pos.VERTICAL),
+            (left, Pos.RIGHT_EDGE),
+            (right, Pos.LEFT_EDGE),
+            (vertical, Pos.BASE),
         ):
             if neighbour:
-                neighbour.neighbours[position] = self
+                neighbour.relations[position] = self
 
     def find(self, path: list[Pos]) -> "Node":
         """
@@ -99,10 +108,7 @@ class Node:
         """
         node = self
         for pos in path:
-            if pos < 0:
-                node = node.neighbours[-pos]
-            else:
-                node = node.children[pos]
+            node = node.relations.get(pos, None)
             if not node:
                 return None
         return node
@@ -120,9 +126,16 @@ class Node:
         x = [a[0], b[0], c[0], a[0]]
         y = [a[1], b[1], c[1], a[1]]
         plt.plot(x, y, color=colour)
+        if self.data:
+            plt.text(
+                self.lon,
+                self.lat + self.direction * self.width / 2,
+                str(self),
+                color=colour,
+            )
 
         if depth := depth - 1:
-            for child in self.children:
+            for child in self.relations.values():
                 if child:
                     child.plot(depth, colour)
 
@@ -151,23 +164,18 @@ class Node:
         return tip, left, right
 
     @property
-    def parent(self):
-        return self.neighbours[Pos.CENTER]
+    def parent(self) -> "Node":
+        return self.relations[Pos.CENTER]
 
     @property
     def address(self) -> list[Pos]:
         """
         Return the path to this node in the tree.
         """
-        ret = []
-        current = self
-        while current.parent:
-            ret.insert(current.parent.children.index(current), 0)
-            current = current.parent
-        return ret
+        return ([self.parent.address] if self.parent else []) + [self.pos]
 
     def __str__(self):
-        return "/".join(str(i) for i in self.address)
+        return str(self.data) if self.data else repr(self)
 
     def __repr__(self):
-        return "/".join(str(i) for i in self.address)
+        return "/".join(str(int(i)) for i in self.address)
