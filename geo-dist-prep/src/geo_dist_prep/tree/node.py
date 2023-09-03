@@ -1,6 +1,7 @@
 import sys
 
-from .pos import Pos
+from geo_dist_prep.tree.pos import Pos
+from geo_dist_prep.tree.render import plot_node
 
 
 class Node:
@@ -17,6 +18,7 @@ class Node:
         self.lat = coords[0]
         self.lon = coords[1]
         self.data = data
+        self.pos = pos
 
         # direction into the triangle from the tip
         self.flipped: bool = flipped
@@ -70,20 +72,20 @@ class Node:
 
         if my_pos == Pos.LEFT_POINT:
             left = parent.find([Pos.LEFT_POINT, Pos.TIP])
-            right = parent.relations[Pos.CENTER]
+            right = parent.relations.get(Pos.CENTER)
             vertical = parent.find([Pos.BASE, Pos.LEFT_POINT])
         elif my_pos == Pos.RIGHT_POINT:
-            left = parent.relations[Pos.CENTER]
+            left = parent.relations.get(Pos.CENTER)
             right = parent.find([Pos.RIGHT_EDGE, Pos.TIP])
             vertical = parent.find([Pos.BASE, Pos.RIGHT_POINT])
         elif my_pos == Pos.TIP:
             left = parent.find([Pos.LEFT_EDGE, Pos.RIGHT_POINT])
             right = parent.find([Pos.RIGHT_EDGE, Pos.LEFT_POINT])
-            vertical = parent.relations[Pos.CENTER]
+            vertical = parent.relations.get(Pos.CENTER)
         elif my_pos == Pos.CENTER:
-            left = parent.relations[Pos.LEFT_POINT]
-            right = parent.relations[Pos.RIGHT_POINT]
-            vertical = parent.relations[Pos.TIP]
+            left = parent.relations.get(Pos.LEFT_POINT)
+            right = parent.relations.get(Pos.RIGHT_POINT)
+            vertical = parent.relations.get(Pos.TIP)
         else:
             raise ValueError(f"Invalid child position: {my_pos}")
 
@@ -108,7 +110,7 @@ class Node:
         """
         node = self
         for pos in path:
-            node = node.relations.get(pos, None)
+            node = node.relations.get(pos)
             if not node:
                 return None
         return node
@@ -117,27 +119,7 @@ class Node:
         """
         Draw this triangle and its children.
         """
-        # we only need matplotlib when debugging the tree
-        # so import here as a soft dependency
-        import matplotlib.pyplot as plt
-
-        x, y = [], []
-        a, b, c = self.vertices
-        x = [a[0], b[0], c[0], a[0]]
-        y = [a[1], b[1], c[1], a[1]]
-        plt.plot(x, y, color=colour)
-        if self.data:
-            plt.text(
-                self.lon,
-                self.lat + self.direction * self.width / 2,
-                str(self),
-                color=colour,
-            )
-
-        if depth := depth - 1:
-            for child in self.relations.values():
-                if child:
-                    child.plot(depth, colour)
+        plot_node(self, depth, colour)
 
     @property
     def direction(self) -> float:
@@ -155,7 +137,8 @@ class Node:
     @property
     def vertices(self):
         """
-        Return as x, y coordinates for rendering
+        Return three tuples of (lon, lat), one for each vertex of the triangle.
+        Useful for rendering.
         """
         tip = self.lon, self.lat
         left = self.lon - self.width / 2, self.lat + self.height * self.direction
@@ -165,17 +148,27 @@ class Node:
 
     @property
     def parent(self) -> "Node":
-        return self.relations[Pos.CENTER]
+        """
+        The node responsible for this one.
+        """
+        return self.relations[Pos.PARENT]
 
     @property
     def address(self) -> list[Pos]:
         """
         Return the path to this node in the tree.
         """
-        return ([self.parent.address] if self.parent else []) + [self.pos]
+        parents = [self.parent.address] if self.parent else []
+        mine = [self.pos] if self.pos else []
+        return parents + mine
 
     def __str__(self):
+        """ """
         return str(self.data) if self.data else repr(self)
 
     def __repr__(self):
-        return "/".join(str(int(i)) for i in self.address)
+        """
+        Returns a path to the object from the root of the
+        tree.
+        """
+        return ".".join(str(int(i)) for i in self.address)

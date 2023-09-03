@@ -25,3 +25,6 @@ class Pos(Enum):
 
     PARENT = "parent"
     """The parent of this node"""
+
+    ROOT = "root"
+    """The root of the tree, special case for the top level"""

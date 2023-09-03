@@ -1,3 +1,5 @@
+from geo_dist_prep.tree.render import plot_globe
+
 from .node import Node
 from .pos import Pos
 
@@ -7,6 +9,10 @@ TILE_HEIGHT = 180.0 / 3.0
 
 class Globe(Node):
     def __init__(self):
+        super().__init__(
+            coords=(0.0, 0.0), flipped=False, pos=None, depth=0, parent=None, data=None
+        )
+        self.lat = self.lon = 0.0
         self.relations = {}
         self.relations[Pos.PARENT] = None
         self.relations[Pos.LEFT_EDGE] = self
@@ -107,20 +113,38 @@ class Globe(Node):
         for i in range(5):
             n_lon = i * TILE_WIDTH + 180
             s_lon = n_lon + TILE_WIDTH / 2
-            north_cap.append(Node((90, n_lon % 360 - 180), flipped=False, parent=self))
-            north_mid.append(
+            north_cap.append(
                 Node(
-                    (90 - TILE_HEIGHT * 2, n_lon % 360 - 180), flipped=True, parent=self
-                )
-            )
-            south_mid.append(
-                Node(
-                    (-90 + TILE_HEIGHT * 2, s_lon % 360 - 180),
+                    coords=(90, n_lon % 360 - 180),
+                    pos=Pos.ROOT,
                     flipped=False,
                     parent=self,
                 )
             )
-            south_cap.append(Node((-90, s_lon % 360 - 180), flipped=True))
+            north_mid.append(
+                Node(
+                    coords=(90 - TILE_HEIGHT * 2, n_lon % 360 - 180),
+                    pos=Pos.ROOT,
+                    flipped=True,
+                    parent=self,
+                )
+            )
+            south_mid.append(
+                Node(
+                    coords=(-90 + TILE_HEIGHT * 2, s_lon % 360 - 180),
+                    pos=Pos.ROOT,
+                    flipped=False,
+                    parent=self,
+                )
+            )
+            south_cap.append(
+                Node(
+                    coords=(-90, s_lon % 360 - 180),
+                    pos=Pos.ROOT,
+                    flipped=True,
+                    parent=self,
+                )
+            )
 
         for i in range(5):
             left = (i - 1) % 5
@@ -145,5 +169,11 @@ class Globe(Node):
         for i, child in enumerate(children):
             self.relations[i] = child
 
+    def plot(self, depth: int = 1, colour: str = "green"):
+        plot_globe(self, depth, colour)
+
     def __repr__(self):
+        return "Globe()"
+
+    def __str__(self):
         return "Globe()"
