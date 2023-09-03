@@ -55,6 +55,10 @@ class Node:
         in any order, it has to do a local search to figure out what exists.
         """
         parent = self.neighbours[Pos.CENTER]
+
+        if not parent:
+            return
+
         if my_pos == Pos.CENTER:
             left = parent.children[Pos.LEFT]
             right = parent.children[Pos.RIGHT]
@@ -151,17 +155,19 @@ class Node:
         return self.neighbours[Pos.CENTER]
 
     @property
-    def address(self):
+    def address(self) -> list[Pos]:
         """
         Return the path to this node in the tree.
         """
+        ret = []
         current = self
-        if current.parent:
-            yield current.parent.children.index(current)
+        while current.parent:
+            ret.insert(current.parent.children.index(current), 0)
             current = current.parent
+        return ret
 
     def __str__(self):
-        return ",".join(str(i) for i in self.address)
+        return "/".join(str(i) for i in self.address)
 
     def __repr__(self):
-        return ",".join(str(i) for i in self.address)
+        return "/".join(str(i) for i in self.address)
