@@ -16,6 +16,9 @@ class Region:
     def too_large(self):
         return self.ram + 1 > SYSTEM_RAM
 
+    def __lt__(self, other):
+        return self.ram >= other.ram
+
 
 REGIONS = [
     Region(
@@ -112,8 +115,15 @@ def get_region_for_country(country_code):
 
 
 def group_countries_by_region(country_codes):
-    ret = {}
+    vals = {}
     for code in country_codes:
         region = get_region_for_country(code)
-        ret[region] = ret.get(region, []) + [code]
+        vals[region] = vals.get(region, []) + [code]
+
+    # do the high memory ones first so we can move to a cheap box
+    sorter = sorted(vals)
+    ret = {}
+    for key in sorter:
+        ret[key] = vals[key]
+
     return ret
