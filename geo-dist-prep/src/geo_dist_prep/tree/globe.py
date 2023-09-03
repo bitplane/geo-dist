@@ -23,13 +23,17 @@ class Globe(Node):
         :param lon: Longitude of the coordinates.
         :return: Address of the node that contains the coordinates.
         """
-        lat = max(min(lat, 90.0), -90.0)
-        lon = (lon + 180.0) % 360.0 - 180.0
         if not max_depth:
             return
 
+        lat = max(min(lat, 90.0), -90.0)
+        lon = (lon + 180.0) % 360.0 - 180.0
+
         node_id = self._get_root_idx(lat, lon)
         yield node_id
+
+        if max_depth == 1:
+            return
 
         node = self.children[node_id]
 
@@ -69,8 +73,8 @@ class Globe(Node):
             height /= 2
 
     def _get_root_idx(self, lat: float, lon: float) -> int:
-        in_belt = lat < 90.0 - TILE_HEIGHT
-        in_south = lat < -90.0 + TILE_HEIGHT
+        in_belt = lat <= 90.0 - TILE_HEIGHT
+        in_south = lat <= -90.0 + TILE_HEIGHT
         row_idx = 10 if in_south else (5 if in_belt else 0)
 
         column = (lon + TILE_WIDTH / 2.0) // TILE_WIDTH
@@ -78,7 +82,7 @@ class Globe(Node):
             center = column * TILE_WIDTH
             x_fraction = (lon - center) / (TILE_WIDTH / 2)
             y_fraction = (90 - TILE_HEIGHT - lat) / TILE_HEIGHT
-            south_belt = 1 - abs(x_fraction) < y_fraction
+            south_belt = 1 - abs(x_fraction) <= y_fraction
             if south_belt:
                 row_idx += 5
                 if x_fraction < 0:
@@ -139,3 +143,6 @@ class Globe(Node):
             south_mid[i].neighbours[Pos.VERTICAL] = south_cap[i]
 
         self.children = north_cap + north_mid + south_mid + south_cap
+
+    def __repr__(self):
+        return "Globe()"

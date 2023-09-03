@@ -157,7 +157,7 @@ class Node:
         """
         current = self
         if current.parent:
-            yield self.parent.children.find(current)
+            yield current.parent.children.index(current)
             current = current.parent
 
     def __str__(self):
