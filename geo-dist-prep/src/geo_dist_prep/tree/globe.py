@@ -13,6 +13,7 @@ class Globe(Node):
             coords=(0.0, 0.0), flipped=False, pos=None, depth=0, parent=None, data=None
         )
         self.lat = self.lon = 0.0
+        self.pos = Pos.ROOT
         self.relations = {}
         self.relations[Pos.PARENT] = None
         self.relations[Pos.LEFT_EDGE] = self
@@ -116,7 +117,7 @@ class Globe(Node):
             north_cap.append(
                 Node(
                     coords=(90, n_lon % 360 - 180),
-                    pos=Pos.ROOT,
+                    pos=0 + i,
                     flipped=False,
                     parent=self,
                 )
@@ -124,7 +125,7 @@ class Globe(Node):
             north_mid.append(
                 Node(
                     coords=(90 - TILE_HEIGHT * 2, n_lon % 360 - 180),
-                    pos=Pos.ROOT,
+                    pos=5 + i,
                     flipped=True,
                     parent=self,
                 )
@@ -132,7 +133,7 @@ class Globe(Node):
             south_mid.append(
                 Node(
                     coords=(-90 + TILE_HEIGHT * 2, s_lon % 360 - 180),
-                    pos=Pos.ROOT,
+                    pos=10 + i,
                     flipped=False,
                     parent=self,
                 )
@@ -140,7 +141,7 @@ class Globe(Node):
             south_cap.append(
                 Node(
                     coords=(-90, s_lon % 360 - 180),
-                    pos=Pos.ROOT,
+                    pos=15 + i,
                     flipped=True,
                     parent=self,
                 )
@@ -153,19 +154,21 @@ class Globe(Node):
             north_cap[i].relations[Pos.RIGHT_EDGE] = north_cap[right]
             north_cap[i].relations[Pos.BASE] = north_mid[i]
 
+            north_mid[i].relations[Pos.LEFT_EDGE] = south_mid[left]
+            north_mid[i].relations[Pos.RIGHT_EDGE] = south_mid[i]
+            north_mid[i].relations[Pos.BASE] = north_cap[i]
+
+            south_mid[i].relations[Pos.LEFT_EDGE] = north_mid[i]
+            south_mid[i].relations[Pos.RIGHT_EDGE] = north_mid[right]
+            south_mid[i].relations[Pos.BASE] = south_cap[i]
+
             south_cap[i].relations[Pos.LEFT_EDGE] = south_cap[left]
             south_cap[i].relations[Pos.RIGHT_EDGE] = south_cap[right]
             south_cap[i].relations[Pos.BASE] = south_mid[i]
 
-            north_mid[i].relations[Pos.LEFT_EDGE] = south_mid[left]
-            north_mid[i].relations[Pos.RIGHT_EDGE] = south_mid[right]
-            north_mid[i].relations[Pos.BASE] = north_cap[i]
-
-            south_mid[left].relations[Pos.LEFT_EDGE] = north_mid[i]
-            south_mid[right].relations[Pos.RIGHT_EDGE] = north_mid[i]
-            south_mid[i].relations[Pos.BASE] = south_cap[i]
-
         children = north_cap + north_mid + south_mid + south_cap
+
+        # save the children!
         for i, child in enumerate(children):
             self.relations[i] = child
 

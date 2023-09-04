@@ -1,13 +1,10 @@
 """
 Contains some debugging functions to visualize the tree.
 """
-
-import sys
-
 from geo_dist_prep.tree.pos import Pos
 
 
-def plot_node(node, depth: int = sys.maxsize, colour="black"):
+def plot_node(node, depth: int = 6, colour="black"):
     """
     Draw this triangle and its children to the given depth.
     """
@@ -45,5 +42,5 @@ def plot_globe(globe, depth: int = 1, colour="blue") -> None:
     plt.figure()
 
     for name in globe.relations:
-        if name not in Pos:
+        if name not in list(Pos):
             globe.relations[name].plot(depth, colour)

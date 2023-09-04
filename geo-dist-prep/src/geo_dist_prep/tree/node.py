@@ -1,5 +1,3 @@
-import sys
-
 from geo_dist_prep.tree.pos import Pos
 from geo_dist_prep.tree.render import plot_node
 
@@ -71,7 +69,7 @@ class Node:
             return
 
         if my_pos == Pos.LEFT_POINT:
-            left = parent.find([Pos.LEFT_POINT, Pos.TIP])
+            left = parent.find([Pos.LEFT_EDGE, Pos.TIP])
             right = parent.relations.get(Pos.CENTER)
             vertical = parent.find([Pos.BASE, Pos.LEFT_POINT])
         elif my_pos == Pos.RIGHT_POINT:
@@ -115,7 +113,7 @@ class Node:
                 return None
         return node
 
-    def plot(self, depth: int = sys.maxsize, colour="black"):
+    def plot(self, depth: int = 6, colour="black"):
         """
         Draw this triangle and its children.
         """
@@ -158,7 +156,7 @@ class Node:
         """
         Return the path to this node in the tree.
         """
-        parents = [self.parent.address] if self.parent else []
+        parents = self.parent.address if self.parent else []
         mine = [self.pos] if self.pos else []
         return parents + mine
 
@@ -171,4 +169,4 @@ class Node:
         Returns a path to the object from the root of the
         tree.
         """
-        return ".".join(str(int(i)) for i in self.address)
+        return ".".join(str(i) for i in self.address)
