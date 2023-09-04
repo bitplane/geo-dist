@@ -8,7 +8,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 
-def populate_tree(path: str = "."):
+def populate_tree(path: str = ".", limit=None):
     engine = create_engine(f"sqlite:///{path}/{GEONAMES_DB}")
 
     Base.metadata.create_all(engine)
@@ -17,7 +17,10 @@ def populate_tree(path: str = "."):
 
     print(f"populate_tree: loading geonames from {GEONAMES_DB}")
 
-    geonames = session.query(GeoName).all()
+    if limit:
+        geonames = session.query(GeoName).limit(limit).all()
+    else:
+        geonames = session.query(GeoName).all()
 
     globe = Globe()
 
