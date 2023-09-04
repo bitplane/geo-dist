@@ -8,19 +8,19 @@ class Node:
         coords: tuple[float],
         flipped: bool,
         pos: Pos,
+        width: float,
         depth: int = 0,
         parent: "Node" = None,
         data=None,
-        triangular: bool = None,
+        triangular: bool = True,
     ):
         # position of the tip of the triangle
         self.lat = coords[0]
         self.lon = coords[1]
         self.data = data
         self.pos = pos
-        parent_triangle = parent.is_triangular if parent else False
-        new_triangle = triangular if triangular is not None else False
-        self.is_triangular = parent_triangle or new_triangle
+        self.width = width
+        self.is_triangular = triangular
 
         # direction into the triangle from the tip
         self.flipped: bool = flipped
@@ -40,7 +40,12 @@ class Node:
             flipped = self.flipped if pos != Pos.CENTER else not self.flipped
             half_y = self.lat + self.height / 2.0 * self.direction
             base_y = self.lat + self.height * self.direction
-            x_offset = self.width / (4.0 if self.is_triangular else 2.0)
+
+            # square parent, tip facing towards the pole = square child
+            triangle = self.is_triangular or (
+                pos != Pos.TIP and self.lat / -self.direction < 0
+            )
+            x_offset = self.width / (4.0 if triangle else 2)
             coords = {
                 Pos.CENTER: (base_y, self.lon),
                 Pos.TIP: (self.lat, self.lon),
@@ -52,9 +57,11 @@ class Node:
                 coords=coords,
                 flipped=flipped,
                 pos=pos,
+                width=x_offset * 2,
                 depth=depth,
                 parent=self,
                 data=data,
+                triangular=triangle,
             )
             self.relations[pos]._update_neighbours(pos)
 
@@ -127,13 +134,6 @@ class Node:
     def direction(self) -> float:
         """up is positive latitude direction"""
         return 1.0 if self.flipped else -1.0
-
-    @property
-    def width(self) -> float:
-        if self.is_triangular:
-            return 360.0 / 5.0 / 2.0**self.depth
-        tips = sum(1 for pos in self.address if pos == Pos.TIP)
-        return 360.0 / 5.0 / 2.0**tips
 
     @property
     def height(self) -> float:

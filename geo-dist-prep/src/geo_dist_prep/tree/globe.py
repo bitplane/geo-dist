@@ -10,7 +10,13 @@ TILE_HEIGHT = 180.0 / 3.0
 class Globe(Node):
     def __init__(self):
         super().__init__(
-            coords=(0.0, 0.0), flipped=False, pos=None, depth=0, parent=None, data=None
+            coords=(0.0, 0.0),
+            flipped=False,
+            pos=None,
+            width=360.0,
+            depth=0,
+            parent=None,
+            data=None,
         )
         self.lat = self.lon = 0.0
         self.pos = Pos.ROOT
@@ -46,10 +52,10 @@ class Globe(Node):
         width = node.width
         height = node.height
         direction = node.direction
+        square = not node.is_triangular
         y = node.lat
         x = node.lon
         depth = 1
-        belt = 90.0 - TILE_HEIGHT < lat < -90.0 + TILE_HEIGHT
 
         while depth < max_depth:
             tip = abs(lat - y) <= height / 2
@@ -62,21 +68,23 @@ class Globe(Node):
 
             if tip:
                 yield Pos.TIP
+                if square:
+                    square = lat / -direction < 0
             elif center:
                 yield Pos.CENTER
                 y += height * direction
                 direction *= -1
             elif left:
                 yield Pos.LEFT_POINT
-                x -= width / (4 if belt else 2)
+                x -= width / 4
                 y += height / 2 * direction
             else:
                 yield Pos.RIGHT_POINT
-                x += width / (4 if belt else 2)
+                x += width / 4
                 y += height / 2 * direction
 
             depth += 1
-            if belt or not tip:
+            if not square:
                 width /= 2
             height /= 2
 
@@ -120,6 +128,7 @@ class Globe(Node):
                 Node(
                     coords=(90, n_lon % 360 - 180),
                     pos=0 + i,
+                    width=TILE_WIDTH,
                     flipped=False,
                     parent=self,
                     triangular=False,
@@ -129,6 +138,7 @@ class Globe(Node):
                 Node(
                     coords=(90 - TILE_HEIGHT * 2, n_lon % 360 - 180),
                     pos=5 + i,
+                    width=TILE_WIDTH,
                     flipped=True,
                     parent=self,
                     triangular=True,
@@ -138,6 +148,7 @@ class Globe(Node):
                 Node(
                     coords=(-90 + TILE_HEIGHT * 2, s_lon % 360 - 180),
                     pos=10 + i,
+                    width=TILE_WIDTH,
                     flipped=False,
                     parent=self,
                     triangular=True,
@@ -147,6 +158,7 @@ class Globe(Node):
                 Node(
                     coords=(-90, s_lon % 360 - 180),
                     pos=15 + i,
+                    width=TILE_WIDTH,
                     flipped=True,
                     parent=self,
                     triangular=False,
