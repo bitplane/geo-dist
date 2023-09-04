@@ -76,7 +76,7 @@ class Globe(Node):
                 y += height / 2 * direction
 
             depth += 1
-            if belt:
+            if belt or not tip:
                 width /= 2
             height /= 2
 

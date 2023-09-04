@@ -130,7 +130,10 @@ class Node:
 
     @property
     def width(self) -> float:
-        return 360.0 / 5.0 / 2.0**self.depth if self.is_triangular else 360.0 / 5.0
+        if self.is_triangular:
+            return 360.0 / 5.0 / 2.0**self.depth
+        tips = sum(1 for pos in self.address if pos == Pos.TIP)
+        return 360.0 / 5.0 / 2.0**tips
 
     @property
     def height(self) -> float:
