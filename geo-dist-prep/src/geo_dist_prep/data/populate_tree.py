@@ -28,7 +28,7 @@ def populate_tree(path: str = "."):
     for geoname in geonames:
         address = list(globe.get_address(geoname.lat, geoname.lon))
         current = globe
-        for pos in address[:-1]:
+        for pos in address:
             current = current.add_child(pos)
         current.add_child(address[-1], geoname.name)
 

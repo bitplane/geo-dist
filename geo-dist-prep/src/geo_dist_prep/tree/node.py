@@ -11,12 +11,16 @@ class Node:
         depth: int = 0,
         parent: "Node" = None,
         data=None,
+        triangular: bool = None,
     ):
         # position of the tip of the triangle
         self.lat = coords[0]
         self.lon = coords[1]
         self.data = data
         self.pos = pos
+        parent_triangle = parent.is_triangular if parent else False
+        new_triangle = triangular if triangular is not None else False
+        self.is_triangular = parent_triangle or new_triangle
 
         # direction into the triangle from the tip
         self.flipped: bool = flipped
@@ -36,12 +40,12 @@ class Node:
             flipped = self.flipped if pos != Pos.CENTER else not self.flipped
             half_y = self.lat + self.height / 2.0 * self.direction
             base_y = self.lat + self.height * self.direction
-            quarter_x = self.width / 4.0
+            x_offset = self.width / (4.0 if self.is_triangular else 2.0)
             coords = {
                 Pos.CENTER: (base_y, self.lon),
                 Pos.TIP: (self.lat, self.lon),
-                Pos.LEFT_POINT: (half_y, self.lon - quarter_x),
-                Pos.RIGHT_POINT: (half_y, self.lon + quarter_x),
+                Pos.LEFT_POINT: (half_y, self.lon - x_offset),
+                Pos.RIGHT_POINT: (half_y, self.lon + x_offset),
             }[pos]
             depth = self.depth + 1
             self.relations[pos] = Node(
@@ -126,7 +130,7 @@ class Node:
 
     @property
     def width(self) -> float:
-        return 360.0 / 5.0 / 2.0**self.depth
+        return 360.0 / 5.0 / 2.0**self.depth if self.is_triangular else 360.0 / 5.0
 
     @property
     def height(self) -> float:
@@ -135,14 +139,18 @@ class Node:
     @property
     def vertices(self):
         """
-        Return three tuples of (lon, lat), one for each vertex of the triangle.
-        Useful for rendering.
+        Return three or four tuples of (lon, lat), one for each vertex.
         """
-        tip = self.lon, self.lat
-        left = self.lon - self.width / 2, self.lat + self.height * self.direction
-        right = self.lon + self.width / 2, self.lat + self.height * self.direction
+        base_left = self.lon - self.width / 2, self.lat + self.height * self.direction
+        base_right = self.lon + self.width / 2, self.lat + self.height * self.direction
 
-        return tip, left, right
+        if self.is_triangular:
+            tip = self.lon, self.lat
+            return tip, base_left, base_right
+        else:
+            tip_left = self.lon - self.width / 2, self.lat
+            tip_right = self.lon + self.width / 2, self.lat
+            return tip_left, tip_right, base_right, base_left
 
     @property
     def parent(self) -> "Node":
@@ -161,7 +169,9 @@ class Node:
         return parents + mine
 
     def __str__(self):
-        """ """
+        """
+        Returns the node's data, or its address if it has no data.
+        """
         return str(self.data) if self.data else repr(self)
 
     def __repr__(self):
@@ -169,4 +179,4 @@ class Node:
         Returns a path to the object from the root of the
         tree.
         """
-        return ".".join(str(i) for i in self.address)
+        return ".".join(i.value if isinstance(i, Pos) else str(i) for i in self.address)

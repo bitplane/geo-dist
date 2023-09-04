@@ -14,9 +14,9 @@ def plot_node(node, depth: int = 6, colour="black"):
     node: Node = node
 
     x, y = [], []
-    a, b, c = node.vertices
-    x = [a[0], b[0], c[0], a[0]]
-    y = [a[1], b[1], c[1], a[1]]
+    verts = node.vertices
+    x = [vert[0] for vert in verts] + [verts[0][0]]
+    y = [vert[1] for vert in verts] + [verts[0][1]]
     plt.plot(x, y, color=colour)
     if node.data:
         plt.text(

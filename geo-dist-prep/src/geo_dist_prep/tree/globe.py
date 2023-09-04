@@ -49,6 +49,7 @@ class Globe(Node):
         y = node.lat
         x = node.lon
         depth = 1
+        belt = 90.0 - TILE_HEIGHT < lat < -90.0 + TILE_HEIGHT
 
         while depth < max_depth:
             tip = abs(lat - y) <= height / 2
@@ -67,15 +68,16 @@ class Globe(Node):
                 direction *= -1
             elif left:
                 yield Pos.LEFT_POINT
-                x -= width / 4
+                x -= width / (4 if belt else 2)
                 y += height / 2 * direction
             else:
                 yield Pos.RIGHT_POINT
-                x += width / 4
+                x += width / (4 if belt else 2)
                 y += height / 2 * direction
 
             depth += 1
-            width /= 2
+            if belt:
+                width /= 2
             height /= 2
 
     def _get_root_idx(self, lat: float, lon: float) -> int:
@@ -120,6 +122,7 @@ class Globe(Node):
                     pos=0 + i,
                     flipped=False,
                     parent=self,
+                    triangular=False,
                 )
             )
             north_mid.append(
@@ -128,6 +131,7 @@ class Globe(Node):
                     pos=5 + i,
                     flipped=True,
                     parent=self,
+                    triangular=True,
                 )
             )
             south_mid.append(
@@ -136,6 +140,7 @@ class Globe(Node):
                     pos=10 + i,
                     flipped=False,
                     parent=self,
+                    triangular=True,
                 )
             )
             south_cap.append(
@@ -144,6 +149,7 @@ class Globe(Node):
                     pos=15 + i,
                     flipped=True,
                     parent=self,
+                    triangular=False,
                 )
             )
 
@@ -171,6 +177,10 @@ class Globe(Node):
         # save the children!
         for i, child in enumerate(children):
             self.relations[i] = child
+
+    @property
+    def address(self):
+        return []
 
     def plot(self, depth: int = 1, colour: str = "green"):
         plot_globe(self, depth, colour)
