@@ -1,7 +1,20 @@
 """
 Contains some debugging functions to visualize the tree.
 """
+import math
+
 from geo_dist_prep.tree.pos import Pos
+
+
+def lat_lon_to_xyz(lat, lon, radius=1):
+    lat_rad = math.radians(lat)
+    lon_rad = math.radians(lon)
+
+    x = radius * math.cos(lat_rad) * math.cos(lon_rad)
+    y = radius * math.cos(lat_rad) * math.sin(lon_rad)
+    z = radius * math.sin(lat_rad)
+
+    return x, y, z
 
 
 def plot_node(node, depth: int = 6, colour="black"):
@@ -13,9 +26,13 @@ def plot_node(node, depth: int = 6, colour="black"):
 
     node: Node = node
 
-    verts = node.vertices
+    verts = node.vertices_2d
+
+    # x, y, z = zip(*[lat_lon_to_xyz(lat, lon) for lon, lat in verts])
+
     x = [vert[0] for vert in verts] + [verts[0][0]]
     y = [vert[1] for vert in verts] + [verts[0][1]]
+
     plt.plot(x, y, color=colour)
     if node.data:
         plt.text(
