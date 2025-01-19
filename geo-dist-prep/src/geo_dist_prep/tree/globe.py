@@ -52,7 +52,7 @@ class Globe(Node):
         width = node.width
         height = node.height
         direction = node.direction
-        flat_edge = node.flat_edge
+        square = not node.is_triangular
         y = node.lat
         x = node.lon
         depth = 1
@@ -68,13 +68,12 @@ class Globe(Node):
 
             if tip:
                 yield Pos.TIP
-                if flat_edge:
-                    flat_edge = lat / -direction < 0
+                if square:
+                    square = lat / -direction < 0
             elif center:
                 yield Pos.CENTER
                 y += height * direction
                 direction *= -1
-                flat_edge = False
             elif left:
                 yield Pos.LEFT_POINT
                 x -= width / 4
@@ -85,7 +84,7 @@ class Globe(Node):
                 y += height / 2 * direction
 
             depth += 1
-            if not flat_edge:
+            if not square:
                 width /= 2
             height /= 2
 
@@ -132,7 +131,7 @@ class Globe(Node):
                     width=TILE_WIDTH,
                     flipped=False,
                     parent=self,
-                    flat_edge=True,
+                    triangular=False,
                 )
             )
             north_mid.append(
@@ -142,7 +141,7 @@ class Globe(Node):
                     width=TILE_WIDTH,
                     flipped=True,
                     parent=self,
-                    flat_edge=False,
+                    triangular=True,
                 )
             )
             south_mid.append(
@@ -152,7 +151,7 @@ class Globe(Node):
                     width=TILE_WIDTH,
                     flipped=False,
                     parent=self,
-                    flat_edge=False,
+                    triangular=True,
                 )
             )
             south_cap.append(
@@ -162,7 +161,7 @@ class Globe(Node):
                     width=TILE_WIDTH,
                     flipped=True,
                     parent=self,
-                    flat_edge=True,
+                    triangular=False,
                 )
             )
 
@@ -190,6 +189,10 @@ class Globe(Node):
         # save the children!
         for i, child in enumerate(children):
             self.relations[i] = child
+
+    @property
+    def address(self):
+        return []
 
     def plot(self, depth: int = 1, colour: str = "green"):
         plot_globe(self, depth, colour)

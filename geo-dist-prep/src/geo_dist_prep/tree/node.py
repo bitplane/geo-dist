@@ -12,7 +12,7 @@ class Node:
         depth: int = 0,
         parent: "Node" = None,
         data=None,
-        flat_edge: bool = True,
+        triangular: bool = True,
     ):
         # position of the tip of the triangle
         self.lat = coords[0]
@@ -20,8 +20,7 @@ class Node:
         self.data = data
         self.pos = pos
         self.width = width
-        # left and right sides are attached to a triangle of the same orientation
-        self.flat_edge = flat_edge
+        self.is_triangular = triangular
 
         # direction into the triangle from the tip
         self.flipped: bool = flipped
@@ -42,40 +41,27 @@ class Node:
             half_y = self.lat + self.height / 2.0 * self.direction
             base_y = self.lat + self.height * self.direction
 
-            flat_direction = pos == Pos.TIP and self.facing_pole
-            flat_edge = self.flat_edge and flat_direction
-
-            flat_tip = flat_edge and (
-                pos not in (Pos.LEFT_POINT, Pos.RIGHT_POINT, Pos.CENTER)
+            # square parent, tip facing towards the pole = square child
+            triangle = self.is_triangular or (
+                pos != Pos.TIP and self.lat / -self.direction < 0
             )
-
-            wide_center = pos == Pos.CENTER and self.draws_rectangular
-
-            full_width = flat_tip or wide_center
-            width = self.width / (1.0 if full_width else 2.0)
-
+            x_offset = self.width / (4.0 if triangle else 2)
             coords = {
                 Pos.CENTER: (base_y, self.lon),
                 Pos.TIP: (self.lat, self.lon),
-                Pos.LEFT_POINT: (
-                    half_y,
-                    self.lon - (width / 0.5),
-                ),
-                Pos.RIGHT_POINT: (
-                    half_y,
-                    self.lon + (width / 0.5),
-                ),
+                Pos.LEFT_POINT: (half_y, self.lon - x_offset),
+                Pos.RIGHT_POINT: (half_y, self.lon + x_offset),
             }[pos]
             depth = self.depth + 1
             self.relations[pos] = Node(
                 coords=coords,
                 flipped=flipped,
                 pos=pos,
-                width=width,
+                width=x_offset * 2,
                 depth=depth,
                 parent=self,
                 data=data,
-                flat_edge=flat_edge,
+                triangular=triangle,
             )
             self.relations[pos]._update_neighbours(pos)
 
@@ -154,55 +140,20 @@ class Node:
         return 180.0 / 3.0 / 2.0**self.depth
 
     @property
-    def facing_pole(self) -> bool:
-        return self.lat * -self.direction > 0
-
-    @property
-    def draws_triangular(self) -> bool:
+    def vertices(self):
         """
-        Cap edges at the tip draw rectangularly in a 2d projection.
+        Return three or four tuples of (lon, lat), one for each vertex.
         """
-        return not self.flat_edge and self.facing_pole and self.pos != Pos.TIP
+        base_left = self.lon - self.width / 2, self.lat + self.height * self.direction
+        base_right = self.lon + self.width / 2, self.lat + self.height * self.direction
 
-    @property
-    def vertices_2d(self):
-        """
-        Return tuples of (lon, lat), one for each vertex.
-        Might return 4 vertices if the tip
-        """
-        base_y = self.lat + self.height * self.direction
-        base_left_x, base_right_x = self.base_x
-
-        base_left = base_left_x, base_y
-        base_right = base_right_x, base_y
-
-        if self.draws_rectangular:
-            tip1 = base_left_x, self.lat
-            tip2 = base_right_x, self.lat
-            return tip1, base_left, base_right, tip2
-
-        tip = self.lon, self.lat
-
-        return tip, base_left, base_right
-
-    @property
-    def base_x(self):
-        """
-        Return the x coords of the base
-        """
-        if self.flat_edge:
-            if self.pos == Pos.LEFT_EDGE:
-                return self.lon, self.lon + self.width
-            elif self.pos == Pos.RIGHT_EDGE:
-                return self.lon - self.width, self.lon
-
-        return (self.lon - self.width / 2), (self.lon + self.width / 2)
-
-    @property
-    def draws_rectangular(self):
-        return self.flat_edge and (
-            self.pos not in (Pos.LEFT_POINT, Pos.RIGHT_POINT, Pos.CENTER)
-        )
+        if self.is_triangular:
+            tip = self.lon, self.lat
+            return tip, base_left, base_right
+        else:
+            tip_left = self.lon - self.width / 2, self.lat
+            tip_right = self.lon + self.width / 2, self.lat
+            return tip_left, tip_right, base_right, base_left
 
     @property
     def parent(self) -> "Node":
@@ -217,7 +168,7 @@ class Node:
         Return the path to this node in the tree.
         """
         parents = self.parent.address if self.parent else []
-        mine = [self.pos] if self.pos != Pos.ROOT else []
+        mine = [self.pos] if self.pos else []
         return parents + mine
 
     def __str__(self):
