@@ -1,132 +1,102 @@
-from math import sqrt
-from typing import NamedTuple
-
-import matplotlib.pyplot as plt
-from geo_dist_prep.tree.pos import Pos
+import math
 
 
-class Coords(NamedTuple):
-    x: float
-    y: float
+class Coords:
+    def __init__(self, x: float, y: float):
+        self.x = x
+        self.y = y
 
-    def __add__(self, other: "Coords") -> "Coords":
-        return Coords(self.x + other.x, self.y + other.y)
+    def slope_to(self, other):
+        if self.x == other.x:
+            return math.inf
+        return (other.y - self.y) / (other.x - self.x)
 
-    def __sub__(self, other: "Coords") -> "Coords":
-        return Coords(self.x - other.x, self.y - other.y)
+    def __eq__(self, other):
+        return self.x == other.x and self.y == other.y
 
-    def __mul__(self, other: float) -> "Coords":
-        return Coords(self.x * other, self.y * other)
-
-    def slope(self) -> float:
-        if self.x == 0:
-            return float("inf")
-        return self.y / self.x
-
-    def length(self) -> float:
-        return sqrt(self.x**2 + self.y**2)
+    def __repr__(self):
+        return f"Coords({self.x}, {self.y})"
 
 
-class Triangle(NamedTuple):
-    a: Coords
-    b: Coords
-    c: Coords
+class Triangle:
+    def __init__(self, A: Coords, B: Coords, C: Coords):
+        self.A = A
+        self.B = B
+        self.C = C
 
-    @property
-    def width(self) -> float:
-        return self.c.x - self.b.x
+    def __contains__(self, point: Coords):
+        # Calculate barycentric coordinates
+        denom = (self.B.y - self.C.y) * (self.A.x - self.C.x) + (
+            self.C.x - self.B.x
+        ) * (self.A.y - self.C.y)
+        a = (
+            (self.B.y - self.C.y) * (point.x - self.C.x)
+            + (self.C.x - self.B.x) * (point.y - self.C.y)
+        ) / denom
+        b = (
+            (self.C.y - self.A.y) * (point.x - self.C.x)
+            + (self.A.x - self.C.x) * (point.y - self.C.y)
+        ) / denom
+        c = 1 - a - b
 
-    @property
-    def height(self) -> float:
-        """
-        Returns the distance between the top and bottom of the triangle.
-        If negative, the triangle is upside down.
-        """
-        return self.a.y - self.b.y
+        # Check if point is inside triangle
+        return 0 <= round(a, 9) <= 1 and 0 <= round(b, 9) <= 1 and 0 <= round(c, 9) <= 1
 
-    def next(self, coords: Coords) -> tuple[Pos, "Triangle"]:
-        """
-        Given a parent triangle, return the Pos and Triangle of the next level
-        of depth that contains the given coordinates.
-        """
-        base_mid = (self.b + self.c) * 0.5
-        mid = (base_mid + self.a) * 0.5
-        # splice_mid = Coords(base_mid.x, mid.y)
+    def point_location(self, coords: Coords):
+        assert coords in self
 
-        dist_tip = self.a.y - coords.y
-        dist_base = base_mid.y - coords.y
+        D = Coords((self.B.x + self.C.x) / 2, self.B.y)
+        m_AB = self.A.slope_to(self.B)
+        m_AC = self.A.slope_to(self.C)
 
-        if dist_tip < dist_base:
-            return Pos.TIP, Triangle(
-                a=self.a,
-                b=(self.a + self.b) * 0.5,
-                c=(self.a + self.c) * 0.5,
-            )
-        else:
-            s = (coords - base_mid).slope()
-            slope = abs(s)
-            print("slope:", s, slope)
-            if s >= 1:
-                return Pos.CENTER, Triangle(
-                    a=base_mid,
-                    b=(self.a + self.b) * 0.5,
-                    c=(self.a + self.c) * 0.5,
-                )
-            elif coords.x < mid.x:
-                return Pos.LEFT_POINT, Triangle(
-                    a=(self.a + self.b) * 0.5,
-                    b=self.b,
-                    c=(self.b + self.c) * 0.5,
-                )
-            else:
-                return Pos.RIGHT_POINT, Triangle(
-                    a=(self.a + self.c) * 0.5,
-                    b=(self.b + self.c) * 0.5,
-                    c=self.c,
-                )
+        E_y = F_y = (self.A.y + self.B.y) / 2
 
-    def plot(self, colour="black"):
+        E_x = self.A.x + ((E_y - self.A.y) / m_AB) if m_AB != float("inf") else self.A.x
+        F_x = self.C.x + ((F_y - self.C.y) / m_AC) if m_AC != float("inf") else self.C.x
+
+        E = Coords(E_x, E_y)
+        F = Coords(F_x, F_y)
+
+        triangles = [
+            Triangle(self.A, E, F),
+            Triangle(E, self.B, D),
+            Triangle(D, E, F),
+            Triangle(F, D, self.C),
+        ]
+
+        for t in triangles:
+            if coords in t:
+                return t
+
+        raise Exception("Point not found in any sub-triangle")
+
+    def plot(self, color="b"):
         import matplotlib.pyplot as plt
 
-        plt.plot(
-            [self.a.x, self.b.x, self.c.x, self.a.x],
-            [self.a.y, self.b.y, self.c.y, self.a.y],
-            color=colour,
-        )
+        x_values = [self.A.x, self.B.x, self.C.x, self.A.x]
+        y_values = [self.A.y, self.B.y, self.C.y, self.A.y]
 
-    def plot_rectangle(self, colour="black"):
-        import matplotlib.pyplot as plt
+        plt.plot(x_values, y_values, color=color)
 
-        plt.plot(
-            [self.b.x, self.b.x, self.c.x, self.c.x, self.b.x],
-            [self.a.y, self.b.y, self.c.y, self.a.y, self.a.y],
-            color=colour,
-        )
+    def __eq__(self, other):
+        return self.A == other.A and self.B == other.B and self.C == other.C
+
+    def __repr__(self):
+        return f"Triangle({self.A}, {self.B}, {self.C})"
 
 
-def drill_down(triangle: Triangle, coords: Coords, depth: int):
-    if depth == 0:
-        return
-    print("depth:", depth)
-    pos, next_tri = triangle.next(coords)
-    next_tri.plot(colour=["r", "g", "b"][depth % 3])
-    drill_down(next_tri, coords, depth - 1)
+def barycentric_coordinates(t: Triangle, coords: Coords):
+    # t.A.x, t.A.y are coordinates for point A, similarly for B and C.
+    # coords.x, coords.y are coordinates for point coords.
 
+    denominator = (t.B.y - t.C.y) * (t.A.x - t.C.x) + (t.C.x - t.B.x) * (t.A.y - t.C.y)
 
-# Initialize plot
-plt.figure()
+    a = (
+        (t.B.y - t.C.y) * (coords.x - t.C.x) + (t.C.x - t.B.x) * (coords.y - t.C.y)
+    ) / denominator
+    b = (
+        (t.C.y - t.A.y) * (coords.x - t.C.x) + (t.A.x - t.C.x) * (coords.y - t.C.y)
+    ) / denominator
+    c = 1 - a - b
 
-# Define the initial parent triangle and coords
-parent_triangle = Triangle(Coords(0, 0), Coords(-100, -100), Coords(100, -100))
-initial_coords = Coords(-20, -63.4)
-
-# Plot the parent triangle
-parent_triangle.plot()
-
-# Drill down to depth 4, for example
-drill_down(parent_triangle, initial_coords, 8)
-
-plt.scatter([initial_coords.x], [initial_coords.y], color="b")
-
-# Show the plot
-plt.show()
+    return a, b, c
