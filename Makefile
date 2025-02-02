@@ -8,7 +8,7 @@ SRC_DIR := geo-dist-prep/src/geo_dist_prep/
 
 GEONAMES_FILE := $(shell python3 $(SRC_DIR)data/__init__.py GEONAMES_FILE)
 
-all: dev .cache/enrich.done
+all: dev .cache/train.done
 
 undo:
 	cp .cache/geonames.bak.gz .cache/geonames.db.bak.gz
@@ -73,6 +73,10 @@ $(GEONAMES_FILE).done: build/download-geonames.sh
 # 6. Add location data using openrouteservice
 .cache/enrich.done: .cache/pair.done .cache/docker.create.done $(SRC_DIR)/data/enrich.py
 	build/data.sh enrich
+
+# 7. Train the model (requires enrichment to be finished)
+.cache/train.done: .cache/enrich.done $(SRC_DIR)/model/train.py build/train.sh
+	@build/train.sh
 
 
 help: ## Show this help
