@@ -57,9 +57,14 @@ def create_docker_environments():
         with open(path + "/conf/ors-config.yml", "w") as fout:
             yaml.dump(config_file, fout, default_flow_style=False, indent=2)
 
-        compose_file = compose_file_template.replace(
-            "{{REGION_NAME}}", region.name.replace("_", "-")
-        ).replace("{{RAM}}", str(region.ram))
+        compose_file = (
+            compose_file_template.replace(
+                "{{REGION_NAME}}", region.name.replace("_", "-")
+            )
+            .replace("{{RAM}}", str(region.ram))
+            .replace("{{RAM_75}}", str(int(region.ram * 0.75)))
+            .replace("{{RAM_95}}", str(int(region.ram * 0.95)))
+        )
 
         with open(path + "/docker-compose.yml", "w") as fout:
             fout.write(compose_file)
