@@ -12,6 +12,7 @@ requires-python = ">=3.9"
 dependencies = [
     "jupyter",
     "tensorflow[and-cuda]>=2.16.0",
+    "tensorboard",  # Visualization for TensorFlow training
     "scikit-learn",
     "httpx[http2]",
     "matplotlib",
