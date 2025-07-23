@@ -1,11 +1,16 @@
 {
   "ors": {
-    "info": {
-      "base_url": "https://openrouteservice.org/",
-      "swagger_documentation_url": "https://api.openrouteservice.org/",
-      "support_mail": "support@openrouteservice.org",
-      "author_tag": "openrouteservice",
-      "content_licence": "LGPL 3.0"
+    "engine": {
+      "profile_default": {
+        "build": {
+          "source_file": "/home/ors/ors-core/data/placeholder.osm.pbf"
+        }
+      },
+      "profiles": {
+        "driving-car": {
+          "enabled": true
+        }
+      }
     },
     "api_settings": {
       "cors": {

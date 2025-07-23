@@ -1,15 +1,25 @@
 import json
 import os
 
+import yaml
+
 from .regions import REGIONS
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 def set_source_files(config: dict, sources: list):
-    config["ors"]["services"]["routing"]["sources"] = [
-        "/home/ors/ors-core/data/" + source for source in sources
-    ]
+    # Update for new ORS config structure
+    if len(sources) == 1:
+        config["ors"]["engine"]["profile_default"]["build"]["source_file"] = (
+            "/home/ors/ors-core/data/" + sources[0]
+        )
+    else:
+        # For multiple sources, we'd need a different approach
+        # For now, just use the first one
+        config["ors"]["engine"]["profile_default"]["build"]["source_file"] = (
+            "/home/ors/ors-core/data/" + sources[0]
+        )
 
 
 def create_dirs(path):
@@ -44,8 +54,8 @@ def create_docker_environments():
         region_file_name = region.file.split("/")[-1]
         set_source_files(config_file, [region_file_name])
 
-        with open(path + "/conf/ors-config.json", "w") as fout:
-            json.dump(config_file, fout)
+        with open(path + "/conf/ors-config.yml", "w") as fout:
+            yaml.dump(config_file, fout, default_flow_style=False, indent=2)
 
         compose_file = compose_file_template.replace(
             "{{REGION_NAME}}", region.name.replace("_", "-")
