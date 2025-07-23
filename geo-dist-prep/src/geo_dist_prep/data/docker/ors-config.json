@@ -183,7 +183,7 @@
                   "lm": {
                     "enabled": false,
                     "threads": 1,
-                    "weightings": "fastest,shortest",
+                    "weightings": "shortest",
                     "landmarks": 16
                   },
                   "core": {
