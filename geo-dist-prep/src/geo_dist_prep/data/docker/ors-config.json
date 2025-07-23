@@ -93,13 +93,13 @@
           "profiles": {
             "default_params": {
               "enabled": false,
-              "threads": 12,
+              "threads": 16,
               "weightings": "recommended",
               "maxcellnodes": 5000
             },
             "hgv": {
               "enabled": false,
-              "threads": 12,
+              "threads": 16,
               "weightings": "recommended, shortest",
               "maxcellnodes": 5000
             }
@@ -148,7 +148,7 @@
               "methods": {
                 "lm": {
                   "enabled": true,
-                  "threads": 4,
+                  "threads": 8,
                   "weightings": "shortest",
                   "landmarks": 16
                 }
@@ -177,7 +177,7 @@
                 "methods": {
                   "ch": {
                     "enabled": true,
-                    "threads": 2,
+                    "threads": 8,
                     "weightings": "shortest"
                   },
                   "lm": {
@@ -188,7 +188,7 @@
                   },
                   "core": {
                     "enabled": true,
-                    "threads": 2,
+                    "threads": 8,
                     "weightings": "shortest",
                     "landmarks": 64,
                     "lmsets": "highways;allow_all"
@@ -233,12 +233,12 @@
                 "methods": {
                   "ch": {
                     "enabled": true,
-                    "threads": 1,
+                    "threads": 4,
                     "weightings": "recommended"
                   },
                   "core": {
                     "enabled": true,
-                    "threads": 1,
+                    "threads": 4,
                     "weightings": "recommended,shortest",
                     "landmarks": 64,
                     "lmsets": "highways;allow_all"
