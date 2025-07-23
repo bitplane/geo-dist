@@ -1,11 +1,49 @@
 import json
 import os
+import sys
 
 import yaml
 
 from .regions import REGIONS
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
+
+
+def download_and_verify_osm_file(url: str, data_dir: str):
+    """Download OSM file and verify checksum. Delete file and exit on checksum failure."""
+    filename = url.split("/")[-1]
+    filepath = os.path.join(data_dir, filename)
+    checksum_url = url + ".md5"
+    checksum_file = filepath + ".md5"
+
+    # Download the OSM file (with resume support)
+    print(f"Downloading {url}...")
+    if os.system(f"wget --continue {url} -P {data_dir}") != 0:
+        print(f"Failed to download {url}")
+        sys.exit(1)
+
+    # Download the checksum file
+    print(f"Downloading checksum from {checksum_url}...")
+    if os.system(f"wget -O {checksum_file} {checksum_url}") != 0:
+        print(f"Failed to download checksum file {checksum_url}")
+        sys.exit(1)
+
+    # Verify checksum
+    print(f"Verifying checksum for {filename}...")
+    original_dir = os.getcwd()
+    try:
+        os.chdir(data_dir)
+        result = os.system(f"md5sum -c {filename}.md5")
+        if result != 0:
+            print(f"Checksum verification failed for {filename}")
+            print("Deleting corrupt file...")
+            os.remove(filename)
+            if os.path.exists(filename + ".md5"):
+                os.remove(filename + ".md5")
+            sys.exit(1)
+        print(f"Checksum verification passed for {filename}")
+    finally:
+        os.chdir(original_dir)
 
 
 def set_source_files(config: dict, sources: list):
@@ -69,7 +107,7 @@ def create_docker_environments():
         with open(path + "/docker-compose.yml", "w") as fout:
             fout.write(compose_file)
 
-        os.system("wget --continue " + region.file + " -P " + path + "/data/")
+        download_and_verify_osm_file(region.file, path + "/data")
 
 
 if __name__ == "__main__":
