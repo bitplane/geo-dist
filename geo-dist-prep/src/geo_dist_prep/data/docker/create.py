@@ -48,16 +48,20 @@ def download_and_verify_osm_file(url: str, data_dir: str):
 
 def set_source_files(config: dict, sources: list):
     # Update for new ORS config structure
+    source_paths = ["/home/ors/ors-core/data/" + source for source in sources]
+
     if len(sources) == 1:
         config["ors"]["engine"]["profile_default"]["build"]["source_file"] = (
-            "/home/ors/ors-core/data/" + sources[0]
+            source_paths[0]
         )
+        config["ors"]["services"]["routing"]["sources"] = source_paths
     else:
         # For multiple sources, we'd need a different approach
         # For now, just use the first one
         config["ors"]["engine"]["profile_default"]["build"]["source_file"] = (
-            "/home/ors/ors-core/data/" + sources[0]
+            source_paths[0]
         )
+        config["ors"]["services"]["routing"]["sources"] = source_paths
 
 
 def create_dirs(path):
