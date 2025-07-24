@@ -38,7 +38,7 @@ REGIONS = [
         name="antarctica",
         file="https://download.geofabrik.de/antarctica-latest.osm.pbf",
         codes=frozenset(("tf", "gs", "aq")),
-        ram=2,  # 0.46gb peak RAM
+        ram=1,  # 0.46gb peak RAM normally
     ),
     Region(
         name="asia",

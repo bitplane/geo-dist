@@ -1,4 +1,3 @@
-import json
 import os
 import sys
 
@@ -36,6 +35,28 @@ def download_and_verify_osm_file(url: str, data_dir: str):
         result = os.system(f"md5sum -c {filename}.md5")
         if result != 0:
             print(f"Checksum verification failed for {filename}")
+            print("=== CHECKSUM FAILURE DETAILS ===")
+
+            # Show expected checksum from .md5 file
+            if os.path.exists(f"{filename}.md5"):
+                with open(f"{filename}.md5", "r") as f:
+                    expected_line = f.read().strip()
+                print(f"Expected (from .md5 file): {expected_line}")
+            else:
+                print("ERROR: .md5 file not found!")
+
+            # Show actual checksum of downloaded file
+            if os.path.exists(filename):
+                actual_result = os.popen(f"md5sum {filename}").read().strip()
+                print(f"Actual (computed): {actual_result}")
+
+                # Show file size for additional diagnostics
+                file_size = os.path.getsize(filename)
+                print(f"File size: {file_size} bytes")
+            else:
+                print("ERROR: Downloaded file not found!")
+
+            print("=== END CHECKSUM DETAILS ===")
             print("Deleting corrupt file...")
             os.remove(filename)
             if os.path.exists(filename + ".md5"):
@@ -47,21 +68,16 @@ def download_and_verify_osm_file(url: str, data_dir: str):
 
 
 def set_source_files(config: dict, sources: list):
-    # Update for new ORS config structure
-    source_paths = ["/home/ors/ors-core/data/" + source for source in sources]
-
+    # Update for modern ORS config structure (v9.3.0+)
     if len(sources) == 1:
         config["ors"]["engine"]["profile_default"]["build"]["source_file"] = (
-            source_paths[0]
+            "/home/ors/ors-core/data/" + sources[0]
         )
-        config["ors"]["services"]["routing"]["sources"] = source_paths
     else:
-        # For multiple sources, we'd need a different approach
-        # For now, just use the first one
+        # For multiple sources, use the first one
         config["ors"]["engine"]["profile_default"]["build"]["source_file"] = (
-            source_paths[0]
+            "/home/ors/ors-core/data/" + sources[0]
         )
-        config["ors"]["services"]["routing"]["sources"] = source_paths
 
 
 def create_dirs(path):
@@ -83,7 +99,7 @@ def create_docker_environments():
         compose_file_template = fin.read()
 
     with open(THIS_DIR + "/ors-config.json", "r") as fin:
-        config_file = json.load(fin)
+        config_file = yaml.safe_load(fin)
 
     for region in REGIONS:
         if region.too_large:
