@@ -38,7 +38,7 @@ REGIONS = [
         name="antarctica",
         file="https://download.geofabrik.de/antarctica-latest.osm.pbf",
         codes=frozenset(("tf", "gs", "aq")),
-        ram=1,  # 0.46gb peak RAM normally
+        ram=7,  # 0.46gb peak RAM normally - bumped for safety
     ),
     Region(
         name="asia",
@@ -63,7 +63,7 @@ REGIONS = [
                 "to|tv|vu|wf|um"
             ).split("|")
         ),
-        ram=4,  # 1.22gb peak RAM
+        ram=7,  # 1.22gb peak RAM - OOM'd at 4GB
     ),
     Region(
         name="europe",
@@ -82,7 +82,7 @@ REGIONS = [
         name="central_america",
         file="https://download.geofabrik.de/central-america-latest.osm.pbf",
         codes=frozenset(code for code in ("bz|cr|sv|gt|hn|ni|pa").split("|")),
-        ram=4,  # 1.12gb peak RAM (580mb)
+        ram=7,  # 1.12gb peak RAM (580mb) - bumped for safety
     ),
     Region(
         name="north_america",
@@ -102,7 +102,7 @@ REGIONS = [
         codes=frozenset(
             code for code in "ar|bo|br|cl|co|ec|fk|gy|py|pe|sr|uy|ve".split("|")
         ),
-        ram=10,  # 5.65gb peak RAM (3.87gb)
+        ram=14,  # 5.65gb peak RAM (3.87gb) - bumped for safety
     ),
 ]
 
