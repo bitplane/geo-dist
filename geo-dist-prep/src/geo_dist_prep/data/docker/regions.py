@@ -51,7 +51,7 @@ REGIONS = [
                 "kr|lk|sy|tj|th|tl|tm|tr|ae|uz|vn|ye"
             ).split("|")
         ),
-        ram=24,  # 18.5gb peak RAM (??) (13gb file)
+        ram=60,  # 18.5gb peak RAM (??) (13gb file) - OOM'd at 30GB
     ),
     Region(
         name="australia_oceania",
