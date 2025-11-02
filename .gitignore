@@ -3,3 +3,5 @@
 __pycache__
 .coverage
 .ipynb_checkpoints
+CLAUDE.md
+.agent-os
